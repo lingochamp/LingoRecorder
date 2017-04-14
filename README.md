@@ -1,6 +1,6 @@
 # LingoRecorder
 
-LingoRecord is a better recorder for Android, you can easily process pcm data from it.
+LingoRecorder is a better recorder for Android, you can easily process pcm data from it.
 
 # Download
 
@@ -17,7 +17,7 @@ License
 
     The MIT License (MIT)
 
-    Copyright (c) 2015 LingoChamp Inc.
+    Copyright (c) 2017 LingoChamp Inc.
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"), to deal
