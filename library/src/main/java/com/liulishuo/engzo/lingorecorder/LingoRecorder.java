@@ -117,7 +117,7 @@ public class LingoRecorder {
     private int channels = 1;
     private int bitsPerSample = 16;
 
-    private String testFilePath;
+    private String wavFilePath;
 
     public LingoRecorder sampleRate(int sampleRate) {
         this.sampleRate = sampleRate;
@@ -134,8 +134,14 @@ public class LingoRecorder {
         return this;
     }
 
+    public LingoRecorder wavFile(String filePath) {
+        this.wavFilePath = filePath;
+        return this;
+    }
+
+    @Deprecated
     public LingoRecorder testFile(String filePath) {
-        this.testFilePath = filePath;
+        this.wavFilePath = filePath;
         return this;
     }
 
