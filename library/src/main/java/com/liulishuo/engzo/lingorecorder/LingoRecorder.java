@@ -74,8 +74,11 @@ public class LingoRecorder {
     public void start() {
         LOG.d("start record");
         IRecorder recorder = null;
-        if (testFilePath != null) {
-            recorder = new WavFileRecorder(testFilePath);
+        if (wavFilePath != null) {
+            recorder = new WavFileRecorder(wavFilePath);
+            // wavFileRecorder not support stop
+            // LingoRecorder will be available until process finish
+            available = false;
         } else {
             recorder = new AndroidRecorder(sampleRate, channels, bitsPerSample);
         }
