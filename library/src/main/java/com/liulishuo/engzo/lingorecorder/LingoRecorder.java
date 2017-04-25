@@ -74,8 +74,11 @@ public class LingoRecorder {
     public void start() {
         LOG.d("start record");
         IRecorder recorder = null;
-        if (testFilePath != null) {
-            recorder = new WavFileRecorder(testFilePath);
+        if (wavFilePath != null) {
+            recorder = new WavFileRecorder(wavFilePath);
+            // wavFileRecorder not support stop
+            // LingoRecorder will be available until process finish
+            available = false;
         } else {
             recorder = new AndroidRecorder(sampleRate, channels, bitsPerSample);
         }
@@ -117,7 +120,7 @@ public class LingoRecorder {
     private int channels = 1;
     private int bitsPerSample = 16;
 
-    private String testFilePath;
+    private String wavFilePath;
 
     public LingoRecorder sampleRate(int sampleRate) {
         this.sampleRate = sampleRate;
@@ -134,8 +137,14 @@ public class LingoRecorder {
         return this;
     }
 
+    public LingoRecorder wavFile(String filePath) {
+        this.wavFilePath = filePath;
+        return this;
+    }
+
+    @Deprecated
     public LingoRecorder testFile(String filePath) {
-        this.testFilePath = filePath;
+        this.wavFilePath = filePath;
         return this;
     }
 
