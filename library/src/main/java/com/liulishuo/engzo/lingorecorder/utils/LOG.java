@@ -9,16 +9,18 @@ import android.util.Log;
 
 public class LOG {
 
+    public static boolean isEnable = false;
+
     public static final String TAG = "LingoRecorder";
 
     public static void d(String log) {
-        if (!TextUtils.isEmpty(log)) {
+        if (isEnable && !TextUtils.isEmpty(log)) {
             Log.d(TAG, log);
         }
     }
 
     public static void e(Throwable throwable) {
-        if (throwable != null) {
+        if (isEnable && throwable != null) {
             Log.e(TAG, Log.getStackTraceString(throwable));
         }
     }
