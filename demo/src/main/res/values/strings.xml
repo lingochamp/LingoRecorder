@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">LingoRecorder</string>
+    <string name="check_permission_title">Permission check</string>
+    <string name="check_permission_content">Need to provide recording and storage permissions.</string>
+    <string name="check_permission_fail">Permission fetch failed</string>
+    <string name="confirm">OK</string>
 </resources>
