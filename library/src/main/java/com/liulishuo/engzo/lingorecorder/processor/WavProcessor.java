@@ -50,16 +50,7 @@ public class WavProcessor implements AudioProcessor {
     @Override
     public void flow(byte[] bytes, int result) throws Exception {
         if (result > 0)  {
-            short[] audioData;
-            audioData = new short[result / 2];
-            ByteBuffer buffer = ByteBuffer.wrap(bytes);
-            buffer.order(ByteOrder.LITTLE_ENDIAN);
-            ShortBuffer sb = buffer.asShortBuffer();
-            sb.get(audioData, 0, result / 2);
-
-            for (short anAudioData : audioData) {
-                writer.writeShort(Short.reverseBytes(anAudioData));
-            }
+            writer.write(bytes);
             payloadSize += result;
         }
     }
