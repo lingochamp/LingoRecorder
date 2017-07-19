@@ -41,7 +41,7 @@ public class WavFileRecorder implements IRecorder {
     public void release() {
         try {
             fis.close();
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
