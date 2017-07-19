@@ -61,7 +61,9 @@ public class AndroidRecorder implements IRecorder {
 
     @Override
     public void release() {
-        recorder.release();
+        if (recorder != null) {
+            recorder.release();
+        }
     }
 
     private class RecordException extends Exception {
