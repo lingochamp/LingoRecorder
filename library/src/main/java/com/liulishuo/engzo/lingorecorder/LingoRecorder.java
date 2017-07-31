@@ -37,29 +37,52 @@ public class LingoRecorder {
     private boolean available = true;
 
     private Handler handler = new Handler(Looper.getMainLooper()) {
+
+        private Message recordStopMsg = null;
+        private Message processStopMsg = null;
+
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
 
             switch (msg.what) {
                 case MESSAGE_RECORD_STOP:
-                    if (onRecordStopListener != null) {
-                        onRecordStopListener.onRecordStop((Throwable) msg.obj);
-                    }
-                    internalRecorder = null;
-                    LOG.d("record end");
+                    recordStopMsg = msg;
+                    handleStopMessage();
                     break;
                 case MESSAGE_PROCESS_STOP:
-                    if (onProcessStopListener != null) {
-                        onProcessStopListener.onProcessStop((Throwable) msg.obj, audioProcessorMap);
-                    }
-                    LOG.d("process end");
+                    processStopMsg = msg;
+                    handleStopMessage();
                     break;
                 case MESSAGE_AVAILABLE:
                     available = true;
                     LOG.d("record available now");
                     break;
             }
+        }
+
+        private void handleStopMessage() {
+            if (recordStopMsg != null && processStopMsg != null) {
+                handleRecordStop(recordStopMsg);
+                handleProcessStop(processStopMsg);
+                recordStopMsg = null;
+                processStopMsg = null;
+            }
+        }
+
+        private void handleRecordStop(Message msg) {
+            if (onRecordStopListener != null) {
+                onRecordStopListener.onRecordStop((Throwable) msg.obj);
+            }
+            internalRecorder = null;
+            LOG.d("record end");
+        }
+
+        private void handleProcessStop(Message msg) {
+            if (onProcessStopListener != null) {
+                onProcessStopListener.onProcessStop((Throwable) msg.obj, audioProcessorMap);
+            }
+            LOG.d("process end");
         }
     };
 
