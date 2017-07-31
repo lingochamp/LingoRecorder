@@ -1,5 +1,6 @@
 package com.liulishuo.engzo.lingorecorder;
 
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -30,6 +31,8 @@ public class LingoRecorder {
     private final static int MESSAGE_RECORD_STOP = 1;
     private final static int MESSAGE_PROCESS_STOP = 2;
     private final static int MESSAGE_AVAILABLE = 3;
+
+    public static final String KEY_DURATION = "duration";
 
     private OnRecordStopListener onRecordStopListener;
     private OnProcessStopListener onProcessStopListener;
@@ -72,8 +75,11 @@ public class LingoRecorder {
         }
 
         private void handleRecordStop(Message msg) {
+            long durationInMills = msg.getData().getLong(KEY_DURATION, -1);
             if (onRecordStopListener != null) {
-                onRecordStopListener.onRecordStop((Throwable) msg.obj);
+                OnRecordStopListener.Result result = new OnRecordStopListener.Result();
+                result.durationInMills = durationInMills;
+                onRecordStopListener.onRecordStop((Throwable) msg.obj, result);
             }
             internalRecorder = null;
             LOG.d("record end");
@@ -133,7 +139,16 @@ public class LingoRecorder {
     }
 
     public interface OnRecordStopListener {
-        void onRecordStop(Throwable throwable);
+
+        public class Result {
+            private long durationInMills;
+
+            public long getDurationInMills() {
+                return durationInMills;
+            }
+        }
+
+        void onRecordStop(Throwable throwable, Result result);
     }
 
     public interface OnProcessStopListener {
@@ -277,6 +292,9 @@ public class LingoRecorder {
                 }
                 Message message = Message.obtain();
                 message.what = MESSAGE_RECORD_STOP;
+                Bundle bundle = new Bundle();
+                bundle.putLong(KEY_DURATION, recorder.getDurationInMills());
+                message.setData(bundle);
                 handler.sendMessage(message);
                 stopMsgSent = true;
                 processorQueue.put("end");

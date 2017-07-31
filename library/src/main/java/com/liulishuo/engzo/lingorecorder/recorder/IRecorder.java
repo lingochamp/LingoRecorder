@@ -15,4 +15,6 @@ public interface IRecorder {
     int read(@NonNull byte[] bytes, int buffSize) throws Throwable;
 
     void release();
+
+    long getDurationInMills();
 }
