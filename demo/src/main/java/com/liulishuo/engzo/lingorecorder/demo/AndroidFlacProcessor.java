@@ -35,9 +35,7 @@ public class AndroidFlacProcessor implements AudioProcessor {
     public void start() {
         try {
             fos = new FileOutputStream(filePath);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
