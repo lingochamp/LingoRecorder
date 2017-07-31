@@ -47,26 +47,27 @@ public class LingoRecorder {
 
             switch (msg.what) {
                 case MESSAGE_RECORD_STOP:
-                    recordStopMsg = msg;
-                    handleStopMessage();
+                    handleRecordStop(msg);
+                    if (processStopMsg != null) {
+                        handleProcessStop(processStopMsg);
+                        processStopMsg = null;
+                    } else {
+                        recordStopMsg = msg;
+                    }
                     break;
                 case MESSAGE_PROCESS_STOP:
-                    processStopMsg = msg;
-                    handleStopMessage();
+                    if (recordStopMsg == null) {
+                        //wait record stop
+                        processStopMsg = msg;
+                    } else {
+                        handleProcessStop(msg);
+                        recordStopMsg = null;
+                    }
                     break;
                 case MESSAGE_AVAILABLE:
                     available = true;
                     LOG.d("record available now");
                     break;
-            }
-        }
-
-        private void handleStopMessage() {
-            if (recordStopMsg != null && processStopMsg != null) {
-                handleRecordStop(recordStopMsg);
-                handleProcessStop(processStopMsg);
-                recordStopMsg = null;
-                processStopMsg = null;
             }
         }
 
