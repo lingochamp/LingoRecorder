@@ -56,9 +56,12 @@ public class DemoActivity extends AppCompatActivity {
 
         lingoRecorder.setOnRecordStopListener(new LingoRecorder.OnRecordStopListener() {
             @Override
-            public void onRecordStop(Throwable error) {
+            public void onRecordStop(Throwable error, Result result) {
                 if (error != null) {
                     Toast.makeText(DemoActivity.this, "录音出错\n" + Log.getStackTraceString(error),
+                            Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(DemoActivity.this, String.format("录音时长 = %d 毫秒", result.getDurationInMills()),
                             Toast.LENGTH_SHORT).show();
                 }
                 recordBtn.setText("start");

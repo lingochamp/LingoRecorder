@@ -84,7 +84,4 @@ public class WavProcessor implements AudioProcessor {
         return filePath;
     }
 
-    public long getDurationInMills() {
-        return (long) (payloadSize * 8.0 * 1000 / bitsPerSample / sampleRate / nChannels );
-    }
 }
