@@ -26,6 +26,9 @@ compile 'com.liulishuo.engzo:lingo-recorder:1.0'
 
 ```
 
+# Pull Request
+Please send your pull request to develop branch.
+
 License
 -------
 
