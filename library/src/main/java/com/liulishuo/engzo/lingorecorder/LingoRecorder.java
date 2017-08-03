@@ -40,10 +40,6 @@ public class LingoRecorder {
 
     private Handler handler = new Handler(Looper.getMainLooper()) {
 
-        private boolean isRecordStopFirst = false;
-        private boolean isProcessStopFirst = false;
-        private Throwable processThrowable = null;
-
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
@@ -51,23 +47,9 @@ public class LingoRecorder {
             switch (msg.what) {
                 case MESSAGE_RECORD_STOP:
                     handleRecordStop(msg);
-                    if (isProcessStopFirst) {
-                        handleProcessStop(processThrowable);
-                        processThrowable = null;
-                        isProcessStopFirst = false;
-                    } else {
-                        isRecordStopFirst = true;
-                    }
                     break;
                 case MESSAGE_PROCESS_STOP:
-                    if (isRecordStopFirst) {
-                        handleProcessStop((Throwable) msg.obj);
-                        isRecordStopFirst = false;
-                    } else {
-                        //wait record stop
-                        isProcessStopFirst = true;
-                        processThrowable = (Throwable) msg.obj;
-                    }
+                    handleProcessStop(msg);
                     break;
                 case MESSAGE_AVAILABLE:
                     available = true;
@@ -87,9 +69,9 @@ public class LingoRecorder {
             LOG.d("record end");
         }
 
-        private void handleProcessStop(Throwable throwable) {
+        private void handleProcessStop(Message msg) {
             if (onProcessStopListener != null) {
-                onProcessStopListener.onProcessStop(throwable, audioProcessorMap);
+                onProcessStopListener.onProcessStop((Throwable) msg.obj, audioProcessorMap);
             }
             LOG.d("process end");
         }
@@ -160,7 +142,6 @@ public class LingoRecorder {
     private int sampleRate = 16000;
     private int channels = 1;
     private int bitsPerSample = 16;
-
     private String wavFilePath;
 
     public LingoRecorder sampleRate(int sampleRate) {
@@ -192,12 +173,12 @@ public class LingoRecorder {
     private static class InternalRecorder implements Runnable {
 
         private volatile boolean shouldRun;
+
         private Thread thread;
-
-
         private IRecorder recorder;
         private Collection<AudioProcessor> audioProcessors;
         private Handler handler;
+        private Throwable processorsError;
 
         InternalRecorder(IRecorder recorder, Collection<AudioProcessor> audioProcessors, Handler handler) {
             thread = new Thread(this);
@@ -227,8 +208,7 @@ public class LingoRecorder {
                 @Override
                 public void run() {
                     super.run();
-                    Object value = null;
-                    Throwable throwable = null;
+                    Object value;
                     try {
                         for (AudioProcessor audioProcessor : audioProcessors) {
                             audioProcessor.start();
@@ -257,18 +237,12 @@ public class LingoRecorder {
                             audioProcessor.end();
                         }
                     } catch (Throwable e) {
-                        throwable = e;
+                        processorsError = e;
                         LOG.e(e);
                     } finally {
                         for (AudioProcessor audioProcessor : audioProcessors) {
                             audioProcessor.release();
                         }
-
-                        Message msg = Message.obtain();
-                        msg.what = MESSAGE_PROCESS_STOP;
-                        msg.obj = throwable;
-                        handler.sendMessage(msg);
-
                         shouldRun = false;
                     }
                 }
@@ -296,12 +270,15 @@ public class LingoRecorder {
             } finally {
                 shouldRun = false;
 
+                //notify stop record
                 Message message = Message.obtain();
                 message.what = MESSAGE_RECORD_STOP;
                 Bundle bundle = new Bundle();
                 bundle.putLong(KEY_DURATION, recorder.getDurationInMills());
                 message.setData(bundle);
                 handler.sendMessage(message);
+
+                //ensure processors' tread has been end
                 try {
                     processorQueue.put("end");
                     processorThread.join();
@@ -309,6 +286,11 @@ public class LingoRecorder {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
+                //notify processors end
+                Message msg = Message.obtain();
+                msg.what = MESSAGE_PROCESS_STOP;
+                msg.obj = processorsError;
+                handler.sendMessage(msg);
 
                 recorder.release();
                 handler.sendEmptyMessage(MESSAGE_AVAILABLE);
