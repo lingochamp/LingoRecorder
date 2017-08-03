@@ -124,7 +124,7 @@ public class LingoRecorder {
 
     public interface OnRecordStopListener {
 
-        public class Result {
+        class Result {
             private long durationInMills;
 
             public long getDurationInMills() {
@@ -173,12 +173,12 @@ public class LingoRecorder {
     private static class InternalRecorder implements Runnable {
 
         private volatile boolean shouldRun;
+        private volatile Throwable processorsError;
 
         private Thread thread;
         private IRecorder recorder;
         private Collection<AudioProcessor> audioProcessors;
         private Handler handler;
-        private Throwable processorsError;
 
         InternalRecorder(IRecorder recorder, Collection<AudioProcessor> audioProcessors, Handler handler) {
             thread = new Thread(this);
