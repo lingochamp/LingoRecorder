@@ -41,6 +41,7 @@ public class LingoRecorder {
     private Handler handler = new Handler(Looper.getMainLooper()) {
 
         private boolean isRecordStopFirst = false;
+        private boolean isProcessStopFirst = false;
         private Throwable processThrowable = null;
 
         @Override
@@ -50,9 +51,10 @@ public class LingoRecorder {
             switch (msg.what) {
                 case MESSAGE_RECORD_STOP:
                     handleRecordStop(msg);
-                    if (processThrowable != null) {
+                    if (isProcessStopFirst) {
                         handleProcessStop(processThrowable);
                         processThrowable = null;
+                        isProcessStopFirst = false;
                     } else {
                         isRecordStopFirst = true;
                     }
@@ -63,6 +65,7 @@ public class LingoRecorder {
                         isRecordStopFirst = false;
                     } else {
                         //wait record stop
+                        isProcessStopFirst = true;
                         processThrowable = (Throwable) msg.obj;
                     }
                     break;
