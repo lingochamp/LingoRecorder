@@ -5,6 +5,7 @@ import android.support.test.runner.AndroidJUnit4;
 
 import com.liulishuo.engzo.lingorecorder.processor.AudioProcessor;
 
+import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -101,12 +102,14 @@ public class RecordAndProcessorEndTest {
         }
     }
 
+    private String processorErrorMsg = null;
     @Test
     public void processorMayEndFirstRecorderCallbackFirst() throws Exception {
+        final String errorMsg = "hah";
         testProcessor = new AudioProcessor() {
             @Override
             public void start() throws Exception {
-                throw new RuntimeException("hah");
+                throw new RuntimeException(errorMsg);
             }
 
             @Override
@@ -133,6 +136,7 @@ public class RecordAndProcessorEndTest {
 
         final CountDownLatch countDownLatch = new CountDownLatch(2);
 
+
         lingoRecorder.setOnRecordStopListener(new LingoRecorder.OnRecordStopListener() {
 
             @Override
@@ -145,6 +149,7 @@ public class RecordAndProcessorEndTest {
         lingoRecorder.setOnProcessStopListener(new LingoRecorder.OnProcessStopListener() {
             @Override
             public void onProcessStop(Throwable throwable, Map<String, AudioProcessor> map) {
+                processorErrorMsg = throwable.getMessage();
                 processorEnd = System.nanoTime();
                 countDownLatch.countDown();
             }
@@ -158,6 +163,9 @@ public class RecordAndProcessorEndTest {
 
         Assert.assertTrue("OnProcessStopListener must callback after OnRecordStopListener",
                 processorEnd > recorderEnd);
+        Assert.assertThat("processor exception should be obtained by OnProcessStopListener",
+                processorErrorMsg,
+                CoreMatchers.is(errorMsg));
     }
 
 }
