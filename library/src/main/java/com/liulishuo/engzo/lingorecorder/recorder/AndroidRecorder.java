@@ -14,10 +14,15 @@ public class AndroidRecorder implements IRecorder {
     private int sampleRate;
     private int channels;
     private int audioFormat;
+    private long payloadSize;
     private AudioRecord recorder;
+    private int bitsPerSample;
+    private int nChannels;
 
     public AndroidRecorder(int sampleRate, int channels, int bitsPerSample) {
         this.sampleRate = sampleRate;
+        this.bitsPerSample = bitsPerSample;
+        this.nChannels = channels;
         if (bitsPerSample == 16) {
             audioFormat = AudioFormat.ENCODING_PCM_16BIT;
         } else if (bitsPerSample == 8) {
@@ -47,6 +52,7 @@ public class AndroidRecorder implements IRecorder {
         if (recorder.getState() != AudioRecord.STATE_INITIALIZED)
             throw new RecordException("init Android audioRecorder error");
 
+        payloadSize = 0;
         recorder.startRecording();
     }
 
@@ -56,18 +62,25 @@ public class AndroidRecorder implements IRecorder {
         if (read < 0) {
             throw new RecordException("recorder read error " + read);
         }
+        payloadSize += read;
         return read;
     }
 
     @Override
     public void release() {
-        recorder.release();
+        if (recorder != null) {
+            recorder.release();
+        }
+    }
+
+    @Override
+    public long getDurationInMills() {
+        return (long) (payloadSize * 8.0 * 1000 / bitsPerSample / sampleRate / nChannels);
     }
 
     private class RecordException extends Exception {
         RecordException(String message) {
             super(message);
         }
-
     }
 }

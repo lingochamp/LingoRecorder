@@ -21,8 +21,7 @@ LingoRecord is a better recorder for Android, you can easily process pcm data fr
 Gradle:
 
 ```
-
-compile 'com.liulishuo.engzo:lingo-recorder:1.1.0'
+compile 'com.liulishuo.engzo:lingo-recorder:1.1.3'
 
 ```
 

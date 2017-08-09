@@ -16,6 +16,12 @@ public class WavFileRecorder implements IRecorder {
     private String filePath;
     private FileInputStream fis;
 
+    private long payloadSize;
+
+    private static final int sampleRate = 16000;
+    private static final int bitsPerSample = 16;
+    private static final int nChannels = 1;
+
     public WavFileRecorder(String filePath) {
         this.filePath = filePath;
     }
@@ -30,19 +36,27 @@ public class WavFileRecorder implements IRecorder {
         fis = new FileInputStream(filePath);
         long skip = fis.skip(44);
         LOG.d("skip size = " + skip);
+        payloadSize = 0;
     }
 
     @Override
     public int read(@NonNull byte[] bytes, int buffSize) throws Exception {
-        return fis.read(bytes, 0, buffSize);
+        int count = fis.read(bytes, 0, buffSize);
+        payloadSize += count;
+        return count;
     }
 
     @Override
     public void release() {
         try {
             fis.close();
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public long getDurationInMills() {
+        return (long) (payloadSize * 8.0 * 1000 / bitsPerSample / sampleRate / nChannels );
     }
 }

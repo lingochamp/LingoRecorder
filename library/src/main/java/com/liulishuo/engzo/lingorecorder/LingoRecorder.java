@@ -1,5 +1,6 @@
 package com.liulishuo.engzo.lingorecorder;
 
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -30,6 +31,7 @@ public class LingoRecorder {
     private final static int MESSAGE_RECORD_STOP = 1;
     private final static int MESSAGE_PROCESS_STOP = 2;
     private final static int MESSAGE_AVAILABLE = 3;
+    private final static String KEY_DURATION = "duration";
 
     private OnRecordStopListener onRecordStopListener;
     private OnProcessStopListener onProcessStopListener;
@@ -37,29 +39,41 @@ public class LingoRecorder {
     private boolean available = true;
 
     private Handler handler = new Handler(Looper.getMainLooper()) {
+
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
 
             switch (msg.what) {
                 case MESSAGE_RECORD_STOP:
-                    if (onRecordStopListener != null) {
-                        onRecordStopListener.onRecordStop((Throwable) msg.obj);
-                    }
-                    internalRecorder = null;
-                    LOG.d("record end");
+                    handleRecordStop(msg);
                     break;
                 case MESSAGE_PROCESS_STOP:
-                    if (onProcessStopListener != null) {
-                        onProcessStopListener.onProcessStop((Throwable) msg.obj, audioProcessorMap);
-                    }
-                    LOG.d("process end");
+                    handleProcessStop(msg);
                     break;
                 case MESSAGE_AVAILABLE:
                     available = true;
                     LOG.d("record available now");
                     break;
             }
+        }
+
+        private void handleRecordStop(Message msg) {
+            long durationInMills = msg.getData().getLong(KEY_DURATION, -1);
+            if (onRecordStopListener != null) {
+                OnRecordStopListener.Result result = new OnRecordStopListener.Result();
+                result.durationInMills = durationInMills;
+                onRecordStopListener.onRecordStop((Throwable) msg.obj, result);
+            }
+            internalRecorder = null;
+            LOG.d("record end");
+        }
+
+        private void handleProcessStop(Message msg) {
+            if (onProcessStopListener != null) {
+                onProcessStopListener.onProcessStop((Throwable) msg.obj, audioProcessorMap);
+            }
+            LOG.d("process end");
         }
     };
 
@@ -109,7 +123,16 @@ public class LingoRecorder {
     }
 
     public interface OnRecordStopListener {
-        void onRecordStop(Throwable throwable);
+
+        class Result {
+            private long durationInMills;
+
+            public long getDurationInMills() {
+                return durationInMills;
+            }
+        }
+
+        void onRecordStop(Throwable throwable, Result result);
     }
 
     public interface OnProcessStopListener {
@@ -119,7 +142,6 @@ public class LingoRecorder {
     private int sampleRate = 16000;
     private int channels = 1;
     private int bitsPerSample = 16;
-
     private String wavFilePath;
 
     public LingoRecorder sampleRate(int sampleRate) {
@@ -151,9 +173,9 @@ public class LingoRecorder {
     private static class InternalRecorder implements Runnable {
 
         private volatile boolean shouldRun;
+        private volatile Throwable processorsError;
+
         private Thread thread;
-
-
         private IRecorder recorder;
         private Collection<AudioProcessor> audioProcessors;
         private Handler handler;
@@ -186,8 +208,7 @@ public class LingoRecorder {
                 @Override
                 public void run() {
                     super.run();
-                    Object value = null;
-                    Throwable throwable = null;
+                    Object value;
                     try {
                         for (AudioProcessor audioProcessor : audioProcessors) {
                             audioProcessor.start();
@@ -202,7 +223,6 @@ public class LingoRecorder {
                                 boolean shouldBreak = false;
                                 for (AudioProcessor audioProcessor : audioProcessors) {
                                     if (audioProcessor.needExit()) {
-                                        shouldRun = false;
                                         LOG.d(String.format("exit because %s", audioProcessor));
                                         shouldBreak = true;
                                         break;
@@ -217,23 +237,17 @@ public class LingoRecorder {
                             audioProcessor.end();
                         }
                     } catch (Throwable e) {
-                        throwable = e;
-                        shouldRun = false;
+                        processorsError = e;
                         LOG.e(e);
                     } finally {
                         for (AudioProcessor audioProcessor : audioProcessors) {
                             audioProcessor.release();
                         }
-                        Message msg = Message.obtain();
-                        msg.what = MESSAGE_PROCESS_STOP;
-                        msg.obj = throwable;
-                        handler.sendMessage(msg);
+                        shouldRun = false;
                     }
                 }
             };
             processorThread.start();
-
-            boolean stopMsgSent = false;
 
             try {
                 recorder.startRecording();
@@ -251,23 +265,33 @@ public class LingoRecorder {
                         break;
                     }
                 }
-                Message message = Message.obtain();
-                message.what = MESSAGE_RECORD_STOP;
-                handler.sendMessage(message);
-                stopMsgSent = true;
-                processorQueue.put("end");
-                processorThread.join();
-                LOG.d("processorThread end");
             } catch (Throwable e) {
                 LOG.e(e);
-                if (!stopMsgSent) {
-                    Message message = Message.obtain();
-                    message.what = MESSAGE_RECORD_STOP;
-                    message.obj = e;
-                    handler.sendMessage(message);
-                }
             } finally {
                 shouldRun = false;
+
+                //notify stop record
+                Message message = Message.obtain();
+                message.what = MESSAGE_RECORD_STOP;
+                Bundle bundle = new Bundle();
+                bundle.putLong(KEY_DURATION, recorder.getDurationInMills());
+                message.setData(bundle);
+                handler.sendMessage(message);
+
+                //ensure processors' tread has been end
+                try {
+                    processorQueue.put("end");
+                    processorThread.join();
+                    LOG.d("processorThread end");
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                //notify processors end
+                Message msg = Message.obtain();
+                msg.what = MESSAGE_PROCESS_STOP;
+                msg.obj = processorsError;
+                handler.sendMessage(msg);
+
                 recorder.release();
                 handler.sendEmptyMessage(MESSAGE_AVAILABLE);
             }

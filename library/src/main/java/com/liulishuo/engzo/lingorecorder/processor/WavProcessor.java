@@ -1,11 +1,6 @@
 package com.liulishuo.engzo.lingorecorder.processor;
 
-import com.liulishuo.engzo.lingorecorder.processor.AudioProcessor;
-
 import java.io.RandomAccessFile;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.ShortBuffer;
 
 /**
  * Created by wcw on 3/28/17.
@@ -17,6 +12,10 @@ public class WavProcessor implements AudioProcessor {
     private RandomAccessFile writer;
     private int payloadSize = 0;
 
+    private short nChannels = 1;
+    private int sampleRate = 16000;
+    private short bitsPerSample = 16;
+
     public WavProcessor(String filePath) {
         this.filePath = filePath;
     }
@@ -24,10 +23,6 @@ public class WavProcessor implements AudioProcessor {
     @Override
     public void start() throws Exception {
         payloadSize = 0;
-        short nChannels = 1;
-        int sRate = 16000;
-        short mBitsPersample = 16;
-
         // http://soundfile.sapp.org/doc/WaveFormat/
         writer = new RandomAccessFile(filePath, "rw");
         writer.setLength(0); // Set file length to 0, to prevent unexpected behavior in case the file already existed
@@ -38,10 +33,10 @@ public class WavProcessor implements AudioProcessor {
         writer.writeInt(Integer.reverseBytes(16)); // Sub-chunk size, 16 for PCM
         writer.writeShort(Short.reverseBytes((short) 1)); // AudioFormat, 1 for PCM
         writer.writeShort(Short.reverseBytes(nChannels));// Number of channels, 1 for mono, 2 for stereo
-        writer.writeInt(Integer.reverseBytes(sRate)); // Sample rate
-        writer.writeInt(Integer.reverseBytes(sRate*nChannels*mBitsPersample/8)); // Byte rate, SampleRate*NumberOfChannels*mBitsPersample/8
-        writer.writeShort(Short.reverseBytes((short)(nChannels*mBitsPersample/8))); // Block align, NumberOfChannels*mBitsPersample/8
-        writer.writeShort(Short.reverseBytes(mBitsPersample)); // Bits per sample
+        writer.writeInt(Integer.reverseBytes(sampleRate)); // Sample rate
+        writer.writeInt(Integer.reverseBytes(sampleRate *nChannels* bitsPerSample /8)); // Byte rate, SampleRate*NumberOfChannels*bitsPerSample/8
+        writer.writeShort(Short.reverseBytes((short)(nChannels* bitsPerSample /8))); // Block align, NumberOfChannels*bitsPerSample/8
+        writer.writeShort(Short.reverseBytes(bitsPerSample)); // Bits per sample
         writer.writeBytes("data");
         writer.writeInt(0); // Data chunk size not known yet, write 0
 
@@ -81,7 +76,12 @@ public class WavProcessor implements AudioProcessor {
         }
     }
 
+    public void setFilePath(String filePath) {
+        this.filePath = filePath;
+    }
+
     public String getFilePath() {
         return filePath;
     }
+
 }
