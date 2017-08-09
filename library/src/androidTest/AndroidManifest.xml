@@ -2,6 +2,7 @@
     package="com.liulishuo.engzo.lingorecorder">
 
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application android:allowBackup="true"
         android:supportsRtl="true">

@@ -329,16 +329,14 @@ public class LingoRecorder {
                                     audioProcessor.flow(wrapBuffer.getBytes(), wrapBuffer.getSize());
                                 }
 
-                                boolean shouldBreak = false;
                                 for (AudioProcessor audioProcessor : audioProcessors) {
                                     checkIfNeedCancel();
                                     if (audioProcessor.needExit()) {
                                         LOG.d(String.format("exit because %s", audioProcessor));
-                                        shouldBreak = true;
+                                        shouldRun = false;
                                         break;
                                     }
                                 }
-                                if (shouldBreak) break;
                             } else {
                                 break;
                             }
@@ -356,7 +354,6 @@ public class LingoRecorder {
                         for (AudioProcessor audioProcessor : audioProcessors) {
                             audioProcessor.release();
                         }
-                        shouldRun = false;
                     }
                 }
             };
