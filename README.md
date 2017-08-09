@@ -22,7 +22,7 @@ Gradle:
 
 ```
 
-compile 'com.liulishuo.engzo:lingo-recorder:1.0'
+compile 'com.liulishuo.engzo:lingo-recorder:1.1.3'
 
 ```
 
