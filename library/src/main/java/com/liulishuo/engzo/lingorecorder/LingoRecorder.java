@@ -351,6 +351,7 @@ public class LingoRecorder {
                         processorsError = e;
                         LOG.e(e);
                     } finally {
+                        shouldRun = false;
                         for (AudioProcessor audioProcessor : audioProcessors) {
                             audioProcessor.release();
                         }
