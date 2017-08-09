@@ -69,7 +69,7 @@ public class DemoActivity extends AppCompatActivity {
                     Toast.makeText(DemoActivity.this, "录音出错\n" + Log.getStackTraceString(error),
                             Toast.LENGTH_SHORT).show();
                 } else {
-                    Toast.makeText(DemoActivity.this, String.format("录音时长 = %d 毫秒", result.getDurationInMills()),
+                    Toast.makeText(DemoActivity.this, String.format("输出文件路径 = %s 录音时长 = %d 毫秒", result.getOutputFilePath(), result.getDurationInMills()),
                             Toast.LENGTH_SHORT).show();
                 }
                 recordBtn.setText("start");
@@ -119,7 +119,7 @@ public class DemoActivity extends AppCompatActivity {
                         lingoRecorder.stop();
                     } else {
                         // need get permission
-                        lingoRecorder.start();
+                        lingoRecorder.start("/sdcard/test2.wav");
                         resultView.setText("");
                         recordBtn.setText("stop");
                     }
@@ -173,7 +173,11 @@ public class DemoActivity extends AppCompatActivity {
         File file = new File(path);
         long size = file.length();
         String[] units = {"B", "kB", "MB", "GB", "TB"};
-        int digitGroups = (int) (Math.log10(size) / Math.log10(1024.0));
-        return new DecimalFormat("#,##0.#").format(size / Math.pow(1024.0, digitGroups)) + " " + units[digitGroups];
+        if (size > 0) {
+            int digitGroups = (int) (Math.log10(size) / Math.log10(1024.0));
+            return new DecimalFormat("#,##0.#").format(size / Math.pow(1024.0, digitGroups)) + " " + units[digitGroups];
+        } else {
+            return "0B";
+        }
     }
 }
