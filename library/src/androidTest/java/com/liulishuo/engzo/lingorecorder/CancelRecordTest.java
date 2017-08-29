@@ -2,6 +2,7 @@ package com.liulishuo.engzo.lingorecorder;
 
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
+import android.util.Log;
 
 import com.liulishuo.engzo.lingorecorder.processor.AudioProcessor;
 
@@ -70,16 +71,16 @@ public class CancelRecordTest {
         lingoRecorder.setOnProcessStopListener(new LingoRecorder.OnProcessStopListener() {
             @Override
             public void onProcessStop(Throwable throwable, Map<String, AudioProcessor> map) {
-                countDownLatch.countDown();
                 throwables[1] = throwable;
+                countDownLatch.countDown();
             }
         });
 
         lingoRecorder.setOnRecordStopListener(new LingoRecorder.OnRecordStopListener() {
             @Override
             public void onRecordStop(Throwable throwable, Result result) {
-                countDownLatch.countDown();
                 throwables[0] = throwable;
+                countDownLatch.countDown();
             }
         });
 
@@ -106,6 +107,7 @@ public class CancelRecordTest {
 
         Assert.assertNull(throwables[0]);
         Assert.assertNotNull(throwables[1]);
+        Log.e(CancelRecordTest.class.getSimpleName(), Log.getStackTraceString(throwables[1]));
         Assert.assertEquals(LingoRecorder.CancelProcessingException.class, throwables[1].getClass());
 
 
