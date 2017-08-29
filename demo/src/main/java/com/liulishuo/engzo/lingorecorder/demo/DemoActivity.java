@@ -1,15 +1,9 @@
 package com.liulishuo.engzo.lingorecorder.demo;
 
-import android.Manifest;
-import android.content.DialogInterface;
-import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
-import android.support.v4.content.PermissionChecker;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -19,7 +13,6 @@ import android.widget.Toast;
 
 import com.liulishuo.engzo.lingorecorder.LingoRecorder;
 import com.liulishuo.engzo.lingorecorder.processor.AudioProcessor;
-import com.liulishuo.engzo.lingorecorder.processor.TimerProcessor;
 import com.liulishuo.engzo.lingorecorder.processor.WavProcessor;
 
 import java.io.File;
@@ -37,8 +30,6 @@ public class DemoActivity extends AppCompatActivity {
     public static final String SCORER = "localScorer";
     public static final String TIMER = "timer";
 
-    private static final int REQUEST_CODE_PERMISSION = 10010;
-
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,11 +45,12 @@ public class DemoActivity extends AppCompatActivity {
         titleView.setText("请说 " + spokenText);
 
         final LingoRecorder lingoRecorder = new LingoRecorder();
-        lingoRecorder.put(WAV, new WavProcessor("/sdcard/test.wav"));
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            lingoRecorder.put(FLAC, new AndroidFlacProcessor("/sdcard/test.flac"));
-        }
-        lingoRecorder.put(TIMER, new TimerProcessor(5000));
+        lingoRecorder.sampleRate(41400);
+//        lingoRecorder.put(WAV, new WavProcessor("/sdcard/test.wav"));
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+//            lingoRecorder.put(FLAC, new AndroidFlacProcessor("/sdcard/test.flac"));
+//        }
+//        lingoRecorder.put(TIMER, new TimerProcessor(5000));
         lingoRecorder.put(SCORER, new LocalScorerProcessor(getApplication(), spokenText));
 
 
@@ -110,9 +102,6 @@ public class DemoActivity extends AppCompatActivity {
         recordBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (!checkRecordPermission()) {
-                    return;
-                }
                 // isAvailable 为 false 为录音正在处理时，需要保护避免在这个时候操作录音器
                 if (lingoRecorder.isAvailable()) {
                     if (lingoRecorder.isRecording()) {
@@ -126,47 +115,6 @@ public class DemoActivity extends AppCompatActivity {
                 }
             }
         });
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == REQUEST_CODE_PERMISSION) {
-            for (int grantResult : grantResults) {
-                if (grantResult != PackageManager.PERMISSION_GRANTED) {
-                    Toast.makeText(this, R.string.check_permission_fail, Toast.LENGTH_LONG).show();
-                    return;
-                }
-            }
-            findViewById(R.id.recordBtn).performClick();
-        }
-    }
-
-    private boolean checkRecordPermission() {
-        if (PermissionChecker.checkSelfPermission(DemoActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
-                || PermissionChecker.checkSelfPermission(DemoActivity.this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                if (shouldShowRequestPermissionRationale(Manifest.permission.WRITE_EXTERNAL_STORAGE) ||
-                        shouldShowRequestPermissionRationale(Manifest.permission.RECORD_AUDIO)) {
-                    new AlertDialog.Builder(DemoActivity.this)
-                            .setTitle(R.string.check_permission_title)
-                            .setMessage(R.string.check_permission_content)
-                            .setCancelable(false)
-                            .setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                                        requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.RECORD_AUDIO}, REQUEST_CODE_PERMISSION);
-                                    }
-                                }
-                            }).show();
-                } else {
-                    requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.RECORD_AUDIO}, REQUEST_CODE_PERMISSION);
-                }
-            }
-            return false;
-        }
-        return true;
     }
 
     private static String formatFileSize(String path) {

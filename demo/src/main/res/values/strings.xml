@@ -4,4 +4,26 @@
     <string name="check_permission_content">Need to provide recording and storage permissions.</string>
     <string name="check_permission_fail">Permission fetch failed</string>
     <string name="confirm">OK</string>
+	<string name="use_wav_recorder">从文件录音</string>
+	<string name="record_demonstrate">录音演示</string>
+	<string name="flac_sample">Flac 示例</string>
+	<string name="simple_recorder_sentence">请说：I will study english very hard.</string>
+	<string name="start_record">Start Record</string>
+	<string name="record_duration">录音时长：%s</string>
+	<string name="record_output">录音文件：%s</string>
+	<string name="record_putput_adress">录音文件输出地址:</string>
+	<string name="sdcard_test_wav">/sdcard/test.wav</string>
+	<string name="play_record">Play Record</string>
+	<string name="stop_record">Stop Record</string>
+	<string name="record_failed">录音出错</string>
+	<string name="process_failed">处理录音出错</string>
+	<string name="record_size">文件大小：%s</string>
+	<string name="source_record_address">音频文件地址</string>
+	<string name="start_scorer">开始打分</string>
+	<string name="record_scorer">打分结果：%s</string>
+	<string name="custom_processors_demonstrate">自定义处理器演示</string>
+	<string name="flac_demonstrate">硬编码 Flac 演示</string>
+	<string name="across_process_processor_demonstrate">跨进程处理器演示</string>
+	<string name="processor_1_title">Processor 1 : %s</string>
+	<string name="processor_2_title">Processor 2 : %s</string>
 </resources>

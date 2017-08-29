@@ -3,9 +3,9 @@ package com.liulishuo.engzo.lingorecorder.recorder;
 import android.support.annotation.NonNull;
 
 import com.liulishuo.engzo.lingorecorder.utils.LOG;
+import com.liulishuo.engzo.lingorecorder.utils.RecorderProperty;
 
 import java.io.FileInputStream;
-import java.io.IOException;
 
 /**
  * Created by wcw on 4/5/17.
@@ -13,17 +13,15 @@ import java.io.IOException;
 
 public class WavFileRecorder implements IRecorder {
 
-    private String filePath;
     private FileInputStream fis;
-
     private long payloadSize;
 
-    private static final int sampleRate = 16000;
-    private static final int bitsPerSample = 16;
-    private static final int nChannels = 1;
+    private final String filePath;
+    private final RecorderProperty recorderProperty;
 
-    public WavFileRecorder(String filePath) {
+    public WavFileRecorder(String filePath, RecorderProperty recorderProperty) {
         this.filePath = filePath;
+        this.recorderProperty = recorderProperty;
     }
 
     @Override
@@ -57,6 +55,12 @@ public class WavFileRecorder implements IRecorder {
 
     @Override
     public long getDurationInMills() {
-        return (long) (payloadSize * 8.0 * 1000 / bitsPerSample / sampleRate / nChannels );
+        return (long) (payloadSize * 8.0 * 1000 / recorderProperty.getBitsPerSample()
+                / recorderProperty.getSampleRate() / recorderProperty.getChannels());
+    }
+
+    @Override
+    public RecorderProperty getRecordProperty() {
+        return recorderProperty;
     }
 }
