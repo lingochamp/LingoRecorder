@@ -42,7 +42,7 @@ lingoRecorder.setOnProcessStopListener(new LingoRecorder.OnProcessStopListener()
 
 Sample effect:
 
-![image](https://raw.githubusercontent.com/lingochamp/LingoRecorder/develop/demo/images/record.gif)
+![image](https://raw.github.com/lingochamp/LingoRecorder/fix/1.2.0/demo/images/record.gif)
 
 ## The usage of custom processors
 
@@ -66,7 +66,7 @@ public interface AudioProcessor {
 
 Sample effect:
 
-![image](https://raw.githubusercontent.com/lingochamp/LingoRecorder/develop/demo/images/custom_processors.gif)
+![image](https://raw.github.com/lingochamp/LingoRecorder/fix/1.2.0/demo/images/custom_processors.gif)
 
 ## Run processor in a separate process.
 
