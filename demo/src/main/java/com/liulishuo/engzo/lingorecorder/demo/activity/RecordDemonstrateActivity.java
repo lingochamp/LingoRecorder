@@ -78,6 +78,18 @@ public class RecordDemonstrateActivity extends RecordActivity {
     }
 
     @Override
+    protected void onRecordError(Throwable throwable) {
+        super.onRecordError(throwable);
+        btnRecord.setText(R.string.start_record);
+    }
+
+    @Override
+    protected void onProcessError(Throwable throwable) {
+        super.onProcessError(throwable);
+        btnRecord.setText(R.string.start_record);
+    }
+
+    @Override
     protected void onProcessStop(Map<String, AudioProcessor> map) {
         btnRecord.setText(R.string.start_record);
         btnPlay.setEnabled(true);

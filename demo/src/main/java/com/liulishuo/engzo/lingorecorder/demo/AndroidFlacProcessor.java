@@ -1,8 +1,6 @@
 package com.liulishuo.engzo.lingorecorder.demo;
 
 import android.media.MediaCodec;
-import android.media.MediaCodecInfo;
-import android.media.MediaCodecList;
 import android.media.MediaFormat;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
@@ -10,7 +8,6 @@ import android.support.annotation.RequiresApi;
 import com.liulishuo.engzo.lingorecorder.processor.AudioProcessor;
 import com.liulishuo.engzo.lingorecorder.utils.LOG;
 
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -26,37 +23,34 @@ public class AndroidFlacProcessor implements AudioProcessor {
 
     private FileOutputStream fos;
 
+    public AndroidFlacProcessor() {
+    }
+
     public AndroidFlacProcessor(String filePath) {
         this.filePath = filePath;
     }
 
+    public void setFilePath(String filePath) {
+        this.filePath = filePath;
+    }
 
     @Override
-    public void start() {
+    public void start() throws IOException {
         try {
             fos = new FileOutputStream(filePath);
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        MediaFormat format  = new MediaFormat();
         String mime = "audio/flac";
-        format.setString(MediaFormat.KEY_MIME, mime);
-        format.setInteger(MediaFormat.KEY_SAMPLE_RATE, 16000);
-        format.setInteger(MediaFormat.KEY_CHANNEL_COUNT, 1);
-
-        String componentName = getEncoderNamesForType(mime);
-        try {
-            codec = MediaCodec.createByCodecName(componentName);
-            codec.configure(
-                    format,
-                    null /* surface */,
-                    null /* crypto */,
-                    MediaCodec.CONFIGURE_FLAG_ENCODE);
-            codec.start();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        MediaFormat format = MediaFormat.createAudioFormat(mime, 16000, 1);
+        codec = MediaCodec.createEncoderByType(mime);
+        codec.configure(
+                format,
+                null /* surface */,
+                null /* crypto */,
+                MediaCodec.CONFIGURE_FLAG_ENCODE);
+        codec.start();
     }
 
     @Override
@@ -124,29 +118,4 @@ public class AndroidFlacProcessor implements AudioProcessor {
         end();
     }
 
-    private String getEncoderNamesForType(String mime) {
-        int n = MediaCodecList.getCodecCount();
-        String name = null;
-        for (int i = 0; i < n; ++i) {
-            MediaCodecInfo info = MediaCodecList.getCodecInfoAt(i);
-            if (!info.isEncoder()) {
-                continue;
-            }
-            if (!info.getName().startsWith("OMX.")) {
-                // Unfortunately for legacy reasons, "AACEncoder", a
-                // non OMX component had to be in this list for the video
-                // editor code to work... but it cannot actually be instantiated
-                // using MediaCodec.
-                continue;
-            }
-            String[] supportedTypes = info.getSupportedTypes();
-            for (int j = 0; j < supportedTypes.length; ++j) {
-                if (supportedTypes[j].equalsIgnoreCase(mime)) {
-                    name = info.getName();
-                    return name;
-                }
-            }
-        }
-        return name;
-    }
 }

@@ -14,7 +14,7 @@
 		<TextView
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:text="@string/record_putput_adress"
+			android:text="@string/record_output_address"
 		/>
 		
 		<EditText

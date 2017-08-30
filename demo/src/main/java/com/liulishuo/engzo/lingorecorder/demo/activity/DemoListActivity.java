@@ -29,4 +29,12 @@ public class DemoListActivity extends AppCompatActivity {
         startActivity(new Intent(this, ProcessorsDemonstrateActivity.class));
     }
 
+    public void flacDemonstrate(View view) {
+        startActivity(new Intent(this, FlacDemonstrateActivity.class));
+    }
+
+    public void acrossProcessDemonstrate(View view) {
+        startActivity(new Intent(this, AcrossProcessDemonstrateActivity.class));
+    }
+
 }

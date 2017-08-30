@@ -62,12 +62,12 @@ public abstract class RecordActivity extends AppCompatActivity {
 
     protected void onProcessError(Throwable throwable) {
         Toast.makeText(this, getString(R.string.process_failed), Toast.LENGTH_SHORT).show();
-        Log.e(TAG, Log.getStackTraceString(throwable), throwable);
+        Log.e(TAG, "Error in processor: \n" + Log.getStackTraceString(throwable), throwable);
     }
 
     protected void onRecordError(Throwable throwable) {
         Toast.makeText(this, getString(R.string.record_failed), Toast.LENGTH_SHORT).show();
-        Log.e(TAG, Log.getStackTraceString(throwable), throwable);
+        Log.e(TAG, "Error in recorder: \n" + Log.getStackTraceString(throwable), throwable);
     }
 
     @Override
