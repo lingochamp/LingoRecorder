@@ -40,7 +40,7 @@ lingoRecorder.setOnProcessStopListener(new LingoRecorder.OnProcessStopListener()
 });
 ```
 
-Sample effect:
+Screenshots:
 
 ![image](https://raw.github.com/lingochamp/LingoRecorder/fix/1.2.0/demo/images/record.gif)
 
@@ -64,14 +64,14 @@ public interface AudioProcessor {
 }
 ```
 
-Sample effect:
+Screenshots:
 
 ![image](https://raw.github.com/lingochamp/LingoRecorder/fix/1.2.0/demo/images/custom_processors.gif)
 
 ## Run processor in a separate process.
 
 We provide aidl interfaces so that you can run a processor in a separate process. In the sample, we custom a `LocalScorerProcessor`
-to run in "scorer" process. Of course, that scorer is not reality, if you want, you can our another open project [OnlineScorer-Android](https://github.com/lingochamp/OnlineScorer-Android).
+to run in "scorer" process. Of course, that scorer is not reality, if you want, you can use our another open project [OnlineScorer-Android](https://github.com/lingochamp/OnlineScorer-Android).
 
 ## Flac encoder
 
