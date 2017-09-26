@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -13,6 +14,7 @@ import com.liulishuo.engzo.lingorecorder.LingoRecorder;
 import com.liulishuo.engzo.lingorecorder.demo.R;
 import com.liulishuo.engzo.lingorecorder.demo.Utils;
 import com.liulishuo.engzo.lingorecorder.processor.AudioProcessor;
+import com.liulishuo.engzo.lingorecorder.volume.OnVolumeListener;
 
 import java.util.Map;
 
@@ -61,6 +63,13 @@ public class RecordDemonstrateActivity extends RecordActivity {
                 intent.setAction(Intent.ACTION_VIEW);
                 intent.setDataAndType(Uri.parse("file://" + outputFile), "audio/*");
                 startActivity(intent);
+            }
+        });
+
+        lingoRecorder.setOnVolumeListener(new OnVolumeListener() {
+            @Override
+            public void onVolume(double volume) {
+                Log.d(RecordDemonstrateActivity.class.getSimpleName(), "volume is " + volume);
             }
         });
     }

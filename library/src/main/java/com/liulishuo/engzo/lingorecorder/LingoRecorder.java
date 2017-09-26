@@ -13,6 +13,8 @@ import com.liulishuo.engzo.lingorecorder.recorder.WavFileRecorder;
 import com.liulishuo.engzo.lingorecorder.utils.LOG;
 import com.liulishuo.engzo.lingorecorder.utils.RecorderProperty;
 import com.liulishuo.engzo.lingorecorder.utils.WrapBuffer;
+import com.liulishuo.engzo.lingorecorder.volume.OnVolumeListener;
+import com.liulishuo.engzo.lingorecorder.volume.VolumePlugin;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -33,11 +35,13 @@ public class LingoRecorder {
     private final static int MESSAGE_RECORD_STOP = 1;
     private final static int MESSAGE_PROCESS_STOP = 2;
     private final static int MESSAGE_AVAILABLE = 3;
+    private final static int MESSAGE_VOLUME = 4;
     private final static String KEY_DURATION = "duration";
     private final static String KEY_FILEPATH = "filePath";
 
     private OnRecordStopListener onRecordStopListener;
     private OnProcessStopListener onProcessStopListener;
+    private OnVolumeListener onVolumeListener;
 
     private boolean available = true;
 
@@ -57,6 +61,11 @@ public class LingoRecorder {
                 case MESSAGE_AVAILABLE:
                     available = true;
                     LOG.d("record available now");
+                    break;
+                case MESSAGE_VOLUME:
+                    if (onVolumeListener != null) {
+                        onVolumeListener.onVolume((Double) msg.obj);
+                    }
                     break;
             }
         }
@@ -141,6 +150,10 @@ public class LingoRecorder {
 
     public void setOnProcessStopListener(OnProcessStopListener onProcessStopListener) {
         this.onProcessStopListener = onProcessStopListener;
+    }
+
+    public void setOnVolumeListener(OnVolumeListener onVolumeListener) {
+        this.onVolumeListener = onVolumeListener;
     }
 
     public void put(String processorId, AudioProcessor processor) {
@@ -253,6 +266,11 @@ public class LingoRecorder {
                         WrapBuffer wrapBuffer = new WrapBuffer();
                         wrapBuffer.setBytes(Arrays.copyOf(bytes, bytes.length));
                         wrapBuffer.setSize(result);
+
+                        final double volume = VolumePlugin.getInstance().getVolumeCalculator().onAudioChunk(wrapBuffer.getBytes(),
+                                wrapBuffer.getSize(), recorder.getRecordProperty().getBitsPerSample());
+                        handler.sendMessage(handler.obtainMessage(MESSAGE_VOLUME, volume));
+
                         processorQueue.put(wrapBuffer);
                         if (wavProcessor != null) {
                             wavProcessor.flow(bytes, result);
