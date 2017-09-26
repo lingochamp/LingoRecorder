@@ -13,8 +13,9 @@ import com.liulishuo.engzo.lingorecorder.recorder.WavFileRecorder;
 import com.liulishuo.engzo.lingorecorder.utils.LOG;
 import com.liulishuo.engzo.lingorecorder.utils.RecorderProperty;
 import com.liulishuo.engzo.lingorecorder.utils.WrapBuffer;
+import com.liulishuo.engzo.lingorecorder.volume.DefaultVolumeCalculator;
+import com.liulishuo.engzo.lingorecorder.volume.IVolumeCalculator;
 import com.liulishuo.engzo.lingorecorder.volume.OnVolumeListener;
-import com.liulishuo.engzo.lingorecorder.volume.VolumePlugin;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -42,6 +43,7 @@ public class LingoRecorder {
     private OnRecordStopListener onRecordStopListener;
     private OnProcessStopListener onProcessStopListener;
     private OnVolumeListener onVolumeListener;
+    private IVolumeCalculator volumeCalculator;
 
     private boolean available = true;
 
@@ -97,6 +99,7 @@ public class LingoRecorder {
 
     public LingoRecorder() {
         this.recorderProperty = new RecorderProperty();
+        setVolumeCalculator(new DefaultVolumeCalculator());
     }
 
     public boolean isAvailable() {
@@ -122,7 +125,7 @@ public class LingoRecorder {
         } else {
             recorder = new AndroidRecorder(recorderProperty);
         }
-        internalRecorder = new InternalRecorder(recorder, outputFilePath, audioProcessorMap.values(), handler);
+        internalRecorder = new InternalRecorder(recorder, outputFilePath, audioProcessorMap.values(), handler, onVolumeListener, volumeCalculator);
         internalRecorder.start();
     }
 
@@ -154,6 +157,10 @@ public class LingoRecorder {
 
     public void setOnVolumeListener(OnVolumeListener onVolumeListener) {
         this.onVolumeListener = onVolumeListener;
+    }
+
+    public void setVolumeCalculator(IVolumeCalculator volumeCalculator) {
+        this.volumeCalculator = volumeCalculator;
     }
 
     public void put(String processorId, AudioProcessor processor) {
@@ -213,13 +220,23 @@ public class LingoRecorder {
         private Collection<AudioProcessor> audioProcessors;
         private Handler handler;
         private String outputFilePath;
+        private OnVolumeListener onVolumeListener;
+        private IVolumeCalculator volumeCalculator;
 
-        InternalRecorder(IRecorder recorder, String outputFilePath, Collection<AudioProcessor> audioProcessors, Handler handler) {
+        InternalRecorder(
+                IRecorder recorder,
+                String outputFilePath,
+                Collection<AudioProcessor> audioProcessors,
+                Handler handler,
+                OnVolumeListener onVolumeListener,
+                IVolumeCalculator volumeCalculator) {
             thread = new Thread(this);
             this.audioProcessors = audioProcessors;
             this.handler = handler;
             this.recorder = recorder;
             this.outputFilePath = outputFilePath;
+            this.onVolumeListener = onVolumeListener;
+            this.volumeCalculator = volumeCalculator;
         }
 
         void cancel() {
@@ -267,9 +284,11 @@ public class LingoRecorder {
                         wrapBuffer.setBytes(Arrays.copyOf(bytes, bytes.length));
                         wrapBuffer.setSize(result);
 
-                        final double volume = VolumePlugin.getInstance().getVolumeCalculator().onAudioChunk(wrapBuffer.getBytes(),
-                                wrapBuffer.getSize(), recorder.getRecordProperty().getBitsPerSample());
-                        handler.sendMessage(handler.obtainMessage(MESSAGE_VOLUME, volume));
+                        if (volumeCalculator != null && volumeCalculator != null) {
+                            final double volume = volumeCalculator.onAudioChunk(wrapBuffer.getBytes(),
+                                    wrapBuffer.getSize(), recorder.getRecordProperty().getBitsPerSample());
+                            handler.sendMessage(handler.obtainMessage(MESSAGE_VOLUME, volume));
+                        }
 
                         processorQueue.put(wrapBuffer);
                         if (wavProcessor != null) {
