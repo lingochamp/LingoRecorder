@@ -82,7 +82,7 @@ Gradle:
 
 ```
 
-compile 'com.liulishuo.engzo:lingo-recorder:1.2.1-SNAPSHOT'
+compile 'com.github.lingochamp:LingoRecorder:1.2.1-SNAPSHOT'
 
 ```
 
