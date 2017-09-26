@@ -11,6 +11,7 @@ import com.liulishuo.engzo.lingorecorder.recorder.AndroidRecorder;
 import com.liulishuo.engzo.lingorecorder.recorder.IRecorder;
 import com.liulishuo.engzo.lingorecorder.recorder.WavFileRecorder;
 import com.liulishuo.engzo.lingorecorder.utils.LOG;
+import com.liulishuo.engzo.lingorecorder.utils.RecorderProperty;
 import com.liulishuo.engzo.lingorecorder.utils.WrapBuffer;
 
 import java.util.Arrays;
@@ -40,7 +41,7 @@ public class LingoRecorder {
 
     private boolean available = true;
 
-    private Handler handler = new Handler(Looper.getMainLooper()) {
+    private final Handler handler = new Handler(Looper.getMainLooper()) {
 
         @Override
         public void handleMessage(Message msg) {
@@ -81,6 +82,14 @@ public class LingoRecorder {
         }
     };
 
+    private final RecorderProperty recorderProperty;
+
+    private String wavFilePath;
+
+    public LingoRecorder() {
+        this.recorderProperty = new RecorderProperty();
+    }
+
     public boolean isAvailable() {
         return available;
     }
@@ -97,12 +106,12 @@ public class LingoRecorder {
         LOG.d("start record");
         IRecorder recorder = null;
         if (wavFilePath != null) {
-            recorder = new WavFileRecorder(wavFilePath);
+            recorder = new WavFileRecorder(wavFilePath, recorderProperty);
             // wavFileRecorder not support stop
             // LingoRecorder will be available until process finish
             available = false;
         } else {
-            recorder = new AndroidRecorder(sampleRate, channels, bitsPerSample);
+            recorder = new AndroidRecorder(recorderProperty);
         }
         internalRecorder = new InternalRecorder(recorder, outputFilePath, audioProcessorMap.values(), handler);
         internalRecorder.start();
@@ -160,33 +169,22 @@ public class LingoRecorder {
         void onProcessStop(Throwable throwable, Map<String, AudioProcessor> map);
     }
 
-    private int sampleRate = 16000;
-    private int channels = 1;
-    private int bitsPerSample = 16;
-    private String wavFilePath;
-
     public LingoRecorder sampleRate(int sampleRate) {
-        this.sampleRate = sampleRate;
+        recorderProperty.setSampleRate(sampleRate);
         return this;
     }
 
     public LingoRecorder channels(int channels) {
-        this.channels = channels;
+        recorderProperty.setChannels(channels);
         return this;
     }
 
     public LingoRecorder bitsPerSample(int bitsPerSample) {
-        this.bitsPerSample = bitsPerSample;
+        recorderProperty.setBitsPerSample(bitsPerSample);
         return this;
     }
 
     public LingoRecorder wavFile(String filePath) {
-        this.wavFilePath = filePath;
-        return this;
-    }
-
-    @Deprecated
-    public LingoRecorder testFile(String filePath) {
         this.wavFilePath = filePath;
         return this;
     }
@@ -238,6 +236,7 @@ public class LingoRecorder {
             WavProcessor wavProcessor = null;
             if (outputFilePath != null) {
                 wavProcessor = new WavProcessor(outputFilePath);
+                wavProcessor.setRecordProperty(recorder.getRecordProperty());
             }
 
             Throwable recordException = null;

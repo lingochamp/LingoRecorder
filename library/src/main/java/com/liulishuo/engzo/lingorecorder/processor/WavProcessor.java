@@ -1,5 +1,7 @@
 package com.liulishuo.engzo.lingorecorder.processor;
 
+import com.liulishuo.engzo.lingorecorder.utils.RecorderProperty;
+
 import java.io.RandomAccessFile;
 
 /**
@@ -12,9 +14,7 @@ public class WavProcessor implements AudioProcessor {
     private RandomAccessFile writer;
     private int payloadSize = 0;
 
-    private short nChannels = 1;
-    private int sampleRate = 16000;
-    private short bitsPerSample = 16;
+    private RecorderProperty recordProperty;
 
     public WavProcessor(String filePath) {
         this.filePath = filePath;
@@ -32,11 +32,19 @@ public class WavProcessor implements AudioProcessor {
         writer.writeBytes("fmt ");
         writer.writeInt(Integer.reverseBytes(16)); // Sub-chunk size, 16 for PCM
         writer.writeShort(Short.reverseBytes((short) 1)); // AudioFormat, 1 for PCM
-        writer.writeShort(Short.reverseBytes(nChannels));// Number of channels, 1 for mono, 2 for stereo
-        writer.writeInt(Integer.reverseBytes(sampleRate)); // Sample rate
-        writer.writeInt(Integer.reverseBytes(sampleRate *nChannels* bitsPerSample /8)); // Byte rate, SampleRate*NumberOfChannels*bitsPerSample/8
-        writer.writeShort(Short.reverseBytes((short)(nChannels* bitsPerSample /8))); // Block align, NumberOfChannels*bitsPerSample/8
-        writer.writeShort(Short.reverseBytes(bitsPerSample)); // Bits per sample
+        writer.writeShort(Short.reverseBytes(
+                (short) recordProperty.getChannels()));// Number of channels, 1 for mono, 2 for
+        // stereo
+        writer.writeInt(Integer.reverseBytes(recordProperty.getSampleRate())); // Sample rate
+        writer.writeInt(Integer.reverseBytes(
+                recordProperty.getSampleRate() * recordProperty.getChannels()
+                        * recordProperty.getBitsPerSample()
+                        / 8)); // Byte rate, SampleRate*NumberOfChannels*bitsPerSample/8
+        writer.writeShort(Short.reverseBytes(
+                (short) (recordProperty.getChannels() * recordProperty.getBitsPerSample()
+                        / 8))); // Block align, NumberOfChannels*bitsPerSample/8
+        writer.writeShort(
+                Short.reverseBytes((short) recordProperty.getBitsPerSample())); // Bits per sample
         writer.writeBytes("data");
         writer.writeInt(0); // Data chunk size not known yet, write 0
 
@@ -82,6 +90,10 @@ public class WavProcessor implements AudioProcessor {
 
     public String getFilePath() {
         return filePath;
+    }
+
+    public void setRecordProperty(RecorderProperty recordProperty) {
+        this.recordProperty = recordProperty;
     }
 
 }
