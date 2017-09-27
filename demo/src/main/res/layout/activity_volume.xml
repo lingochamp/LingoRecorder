@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginTop="20dp"
+        android:textAllCaps="false"
+        android:text="@string/start_record"
+        android:id="@+id/btn_record" />
+
+    <com.liulishuo.engzo.lingorecorder.demo.view.VolumeView
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:id="@+id/volume_view" />
+
+</LinearLayout>

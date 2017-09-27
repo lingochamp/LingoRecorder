@@ -27,4 +27,5 @@
 	<string name="scorer_sentence">I will study english very hard.</string>
 	<string name="scorer_result">打分结果：%s</string>
 	<string name="stop_scorer">结束打分</string>
+	<string name="volume_demonstrate">音量演示</string>
 </resources>
