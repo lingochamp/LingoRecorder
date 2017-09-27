@@ -46,6 +46,16 @@
 			android:layout_gravity="center_horizontal"
 			android:layout_marginTop="20dp"
 			android:onClick="acrossProcessDemonstrate"/>
+
+		<Button
+			android:layout_width="200dp"
+			android:layout_height="45dp"
+			android:text="@string/volume_demonstrate"
+			android:textAllCaps="false"
+			android:id="@+id/btn_volume_sample"
+			android:layout_gravity="center_horizontal"
+			android:layout_marginTop="20dp"
+			android:onClick="volumeDemonstrate" />
 	
 	</LinearLayout>
 

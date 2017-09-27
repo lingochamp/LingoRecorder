@@ -76,6 +76,37 @@ LingoRecorder 提供了 aidl 接口以支持在一个独立的进程中运行 Au
 
 示例中也演示了一个使用 `MediaCodec` 进行 Flac 编码的 AudioProcessor。此示例是为了向有硬编码需求的用户提供一个样例。
 
+## 计算/监听音量
+
+设置音量监听器：
+
+```
+//只设置 OnVolumeListener 的时候，计算音量的方式使用的是一个默认的内部实现
+//内部默认实现的返回值是[0, 90]的分贝值
+lingoRecorder.setOnVolumeListener(new OnVolumeListener() {
+	@Override
+	public void onVolume(double volume) {
+
+	}
+});
+//也可以提供自己的计算音量的实现
+lingoRecorder.setOnVolumeListener(new OnVolumeListener() {
+	@Override
+	public void onVolume(double volume) {
+
+	}
+}, new IVolumeCalculator() {
+	@Override
+	public double onAudioChunk(byte[] chunk, int size, int bitsPerSample) {
+		return 0;
+	}
+});
+```
+Demo 中提供了相关示例，效果图：
+
+![image](https://raw.github.com/lingochamp/LingoRecorder/develop/demo/images/volume.gif)
+
+
 # 在项目中引用
 
 Gradle:

@@ -285,7 +285,7 @@ public class LingoRecorder {
                             final long startCalculateTime = System.currentTimeMillis();
                             final double volume = volumeCalculator.onAudioChunk(wrapBuffer.getBytes(),
                                     wrapBuffer.getSize(), recorder.getRecordProperty().getBitsPerSample());
-                            final long calculateDuration = (System.currentTimeMillis() - startCalculateTime) / 1000;
+                            final long calculateDuration = System.currentTimeMillis() - startCalculateTime;
                             LOG.d("duration of calculating chunk volume: " + calculateDuration);
                             handler.sendMessage(handler.obtainMessage(MESSAGE_VOLUME, volume));
                         }
@@ -412,5 +412,9 @@ public class LingoRecorder {
         public CancelProcessingException(Throwable throwable) {
             super(throwable);
         }
+    }
+
+    public void setDebugEnable(boolean enable) {
+        LOG.isEnable = enable;
     }
 }

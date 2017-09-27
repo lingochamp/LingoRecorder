@@ -37,4 +37,8 @@ public class DemoListActivity extends AppCompatActivity {
         startActivity(new Intent(this, AcrossProcessDemonstrateActivity.class));
     }
 
+    public void volumeDemonstrate(View view) {
+        startActivity(new Intent(this, VolumeDemonstrateActivity.class));
+    }
+
 }

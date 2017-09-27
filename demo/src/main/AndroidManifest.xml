@@ -20,16 +20,26 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name=".activity.RecordDemonstrateActivity"/>
-        <activity android:name=".activity.ProcessorsDemonstrateActivity"/>
-        <activity android:name=".activity.FlacDemonstrateActivity"/>
+        <activity
+            android:name=".activity.RecordDemonstrateActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activity.ProcessorsDemonstrateActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activity.FlacDemonstrateActivity"
+            android:screenOrientation="portrait" />
         
         <service
             android:name=".ScorerService"
             android:process=":scorer"/>
-        
-        <activity android:name=".activity.AcrossProcessDemonstrateActivity">
-        </activity>
+
+        <activity
+            android:name=".activity.AcrossProcessDemonstrateActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activity.VolumeDemonstrateActivity"
+            android:screenOrientation="portrait" />
     </application>
 
 </manifest>
