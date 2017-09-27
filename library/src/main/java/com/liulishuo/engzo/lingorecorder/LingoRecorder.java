@@ -13,6 +13,9 @@ import com.liulishuo.engzo.lingorecorder.recorder.WavFileRecorder;
 import com.liulishuo.engzo.lingorecorder.utils.LOG;
 import com.liulishuo.engzo.lingorecorder.utils.RecorderProperty;
 import com.liulishuo.engzo.lingorecorder.utils.WrapBuffer;
+import com.liulishuo.engzo.lingorecorder.volume.DefaultVolumeCalculator;
+import com.liulishuo.engzo.lingorecorder.volume.IVolumeCalculator;
+import com.liulishuo.engzo.lingorecorder.volume.OnVolumeListener;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -33,11 +36,14 @@ public class LingoRecorder {
     private final static int MESSAGE_RECORD_STOP = 1;
     private final static int MESSAGE_PROCESS_STOP = 2;
     private final static int MESSAGE_AVAILABLE = 3;
+    private final static int MESSAGE_VOLUME = 4;
     private final static String KEY_DURATION = "duration";
     private final static String KEY_FILEPATH = "filePath";
 
     private OnRecordStopListener onRecordStopListener;
     private OnProcessStopListener onProcessStopListener;
+    private OnVolumeListener onVolumeListener;
+    private IVolumeCalculator volumeCalculator;
 
     private boolean available = true;
 
@@ -57,6 +63,11 @@ public class LingoRecorder {
                 case MESSAGE_AVAILABLE:
                     available = true;
                     LOG.d("record available now");
+                    break;
+                case MESSAGE_VOLUME:
+                    if (onVolumeListener != null) {
+                        onVolumeListener.onVolume((Double) msg.obj);
+                    }
                     break;
             }
         }
@@ -113,7 +124,7 @@ public class LingoRecorder {
         } else {
             recorder = new AndroidRecorder(recorderProperty);
         }
-        internalRecorder = new InternalRecorder(recorder, outputFilePath, audioProcessorMap.values(), handler);
+        internalRecorder = new InternalRecorder(recorder, outputFilePath, audioProcessorMap.values(), handler, volumeCalculator);
         internalRecorder.start();
     }
 
@@ -141,6 +152,15 @@ public class LingoRecorder {
 
     public void setOnProcessStopListener(OnProcessStopListener onProcessStopListener) {
         this.onProcessStopListener = onProcessStopListener;
+    }
+
+    public void setOnVolumeListener(OnVolumeListener onVolumeListener) {
+        setOnVolumeListener(onVolumeListener, new DefaultVolumeCalculator());
+    }
+
+    public void setOnVolumeListener(OnVolumeListener onVolumeListener, IVolumeCalculator volumeCalculator) {
+        this.onVolumeListener = onVolumeListener;
+        this.volumeCalculator = volumeCalculator;
     }
 
     public void put(String processorId, AudioProcessor processor) {
@@ -200,13 +220,20 @@ public class LingoRecorder {
         private Collection<AudioProcessor> audioProcessors;
         private Handler handler;
         private String outputFilePath;
+        private IVolumeCalculator volumeCalculator;
 
-        InternalRecorder(IRecorder recorder, String outputFilePath, Collection<AudioProcessor> audioProcessors, Handler handler) {
+        InternalRecorder(
+                IRecorder recorder,
+                String outputFilePath,
+                Collection<AudioProcessor> audioProcessors,
+                Handler handler,
+                IVolumeCalculator volumeCalculator) {
             thread = new Thread(this);
             this.audioProcessors = audioProcessors;
             this.handler = handler;
             this.recorder = recorder;
             this.outputFilePath = outputFilePath;
+            this.volumeCalculator = volumeCalculator;
         }
 
         void cancel() {
@@ -253,6 +280,16 @@ public class LingoRecorder {
                         WrapBuffer wrapBuffer = new WrapBuffer();
                         wrapBuffer.setBytes(Arrays.copyOf(bytes, bytes.length));
                         wrapBuffer.setSize(result);
+
+                        if (volumeCalculator != null) {
+                            final long startCalculateTime = System.currentTimeMillis();
+                            final double volume = volumeCalculator.onAudioChunk(wrapBuffer.getBytes(),
+                                    wrapBuffer.getSize(), recorder.getRecordProperty().getBitsPerSample());
+                            final long calculateDuration = (System.currentTimeMillis() - startCalculateTime) / 1000;
+                            LOG.d("duration of calculating chunk volume: " + calculateDuration);
+                            handler.sendMessage(handler.obtainMessage(MESSAGE_VOLUME, volume));
+                        }
+
                         processorQueue.put(wrapBuffer);
                         if (wavProcessor != null) {
                             wavProcessor.flow(bytes, result);
