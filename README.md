@@ -42,7 +42,7 @@ lingoRecorder.setOnProcessStopListener(new LingoRecorder.OnProcessStopListener()
 
 效果图:
 
-![image](https://raw.github.com/lingochamp/LingoRecorder/1.2.1/demo/images/record.gif)
+![image](https://raw.github.com/lingochamp/LingoRecorder/develop/demo/images/record.gif)
 
 ## 自定义 AudioProcessor 的使用
 
@@ -66,7 +66,7 @@ public interface AudioProcessor {
 
 效果图:
 
-![image](https://raw.github.com/lingochamp/LingoRecorder/1.2.1/demo/images/custom_processors.gif)
+![image](https://raw.github.com/lingochamp/LingoRecorder/develop/demo/images/custom_processors.gif)
 
 ## 将 AudioProcessor 运行在一个独立的进程中
 
@@ -104,7 +104,7 @@ lingoRecorder.setOnVolumeListener(new OnVolumeListener() {
 ```
 Demo 中提供了相关示例，效果图：
 
-![image](https://raw.github.com/lingochamp/LingoRecorder/1.2.1/demo/images/volume.gif)
+![image](https://raw.github.com/lingochamp/LingoRecorder/develop/demo/images/volume.gif)
 
 
 # 在项目中引用
@@ -113,7 +113,7 @@ Gradle:
 
 ```
 
-compile 'com.liulishuo.engzo:lingo-recorder:1.2.1-SNAPSHOT'
+compile 'com.github.lingochamp:LingoRecorder:1.2.1-SNAPSHOT'
 
 ```
 
