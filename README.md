@@ -42,7 +42,7 @@ lingoRecorder.setOnProcessStopListener(new LingoRecorder.OnProcessStopListener()
 
 效果图:
 
-![image](https://raw.github.com/lingochamp/LingoRecorder/fix/1.2.0/demo/images/record.gif)
+![image](https://raw.github.com/lingochamp/LingoRecorder/1.2.1/demo/images/record.gif)
 
 ## 自定义 AudioProcessor 的使用
 
@@ -66,7 +66,7 @@ public interface AudioProcessor {
 
 效果图:
 
-![image](https://raw.github.com/lingochamp/LingoRecorder/fix/1.2.0/demo/images/custom_processors.gif)
+![image](https://raw.github.com/lingochamp/LingoRecorder/1.2.1/demo/images/custom_processors.gif)
 
 ## 将 AudioProcessor 运行在一个独立的进程中
 
