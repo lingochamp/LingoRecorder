@@ -413,4 +413,8 @@ public class LingoRecorder {
             super(throwable);
         }
     }
+
+    public void setDebugEnable(boolean enable) {
+        LOG.isEnable = enable;
+    }
 }
