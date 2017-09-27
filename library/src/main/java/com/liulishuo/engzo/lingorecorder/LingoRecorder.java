@@ -204,6 +204,10 @@ public class LingoRecorder {
         return this;
     }
 
+    public RecorderProperty getRecorderProperty() {
+        return recorderProperty;
+    }
+
     public LingoRecorder wavFile(String filePath) {
         this.wavFilePath = filePath;
         return this;
