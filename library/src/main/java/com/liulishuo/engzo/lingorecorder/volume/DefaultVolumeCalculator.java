@@ -2,7 +2,6 @@ package com.liulishuo.engzo.lingorecorder.volume;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.ShortBuffer;
 
 /**
  * Created by rantianhua on 2017/9/26.
@@ -23,15 +22,13 @@ public class DefaultVolumeCalculator implements IVolumeCalculator {
         double sumVolume = 0.0;
         double avgVolume;
         if (bitsPerSample == 16) {
-            byte[] twoByte = new byte[2];
-            for(int i = 0; i < size; i+=2){
-                twoByte[0] = chunk[i];
-                twoByte[1] = chunk[i + 1];
-                final ByteBuffer byteBuffer = ByteBuffer.wrap(twoByte);
-                final ShortBuffer shortBuffer = byteBuffer.order(ByteOrder.LITTLE_ENDIAN).asShortBuffer();
-                sumVolume += Math.abs(shortBuffer.get(0));
+            final ByteBuffer byteBuffer = ByteBuffer.wrap(chunk, 0, size);
+            final short[] buf = new short[size / 2];
+            byteBuffer.order(ByteOrder.LITTLE_ENDIAN).asShortBuffer().get(buf);
+            for (short b : buf) {
+                sumVolume += Math.abs(b);
             }
-            avgVolume = sumVolume / (size / 2);
+            avgVolume = sumVolume / buf.length;
         } else {
             for (int i = 0; i < size; i++) {
                 sumVolume += Math.abs(chunk[i]);
