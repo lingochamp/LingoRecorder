@@ -56,11 +56,16 @@ public class AndroidRecorder implements IRecorder {
                 channels,
                         audioFormat, buffSize);
 
-        if (recorder.getState() != AudioRecord.STATE_INITIALIZED)
+        if (recorder.getState() != AudioRecord.STATE_INITIALIZED) {
             throw new RecordException("init Android audioRecorder error");
+        }
 
         payloadSize = 0;
         recorder.startRecording();
+
+        if (recorder.getRecordingState() != AudioRecord.RECORDSTATE_RECORDING) {
+            throw new RecordException("start Android audioRecorder error");
+        }
     }
 
     @Override
