@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent">
+	
+	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_margin="20dp"
+		android:orientation="vertical"
+	>
+		
+		<TextView
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="@string/record_output_address"
+		/>
+		
+		<EditText
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:id="@+id/et_output_file"
+			android:inputType="text"
+			android:textColor="@android:color/black"
+			android:text="@string/sdcard_test_wav"
+			android:layout_marginTop="10dp"/>
+	
+	</LinearLayout>
+	
+	
+	<Button
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_marginLeft="20dp"
+		android:layout_marginStart="20dp"
+		android:layout_marginRight="20dp"
+		android:layout_marginEnd="20dp"
+		android:textAllCaps="false"
+		android:text="@string/start_record"
+		android:id="@+id/btn_record"
+	/>
+	
+	<TextView
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_margin="20dp"
+		android:text="@string/record_duration"
+		android:textColor="@android:color/black"
+		android:id="@+id/record_duration"
+	/>
+	
+	<TextView
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_margin="20dp"
+		android:text="@string/record_size"
+		android:textColor="@android:color/black"
+		android:id="@+id/record_size"
+	/>
+	
+	<Button
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_marginLeft="20dp"
+		android:layout_marginStart="20dp"
+		android:layout_marginRight="20dp"
+		android:layout_marginEnd="20dp"
+		android:textAllCaps="false"
+		android:text="@string/play_record"
+		android:id="@+id/btn_play"
+		android:enabled="false"
+	/>
+
+
+</LinearLayout>

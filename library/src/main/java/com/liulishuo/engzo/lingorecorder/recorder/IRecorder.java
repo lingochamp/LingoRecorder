@@ -2,6 +2,8 @@ package com.liulishuo.engzo.lingorecorder.recorder;
 
 import android.support.annotation.NonNull;
 
+import com.liulishuo.engzo.lingorecorder.utils.RecorderProperty;
+
 /**
  * Created by wcw on 4/5/17.
  */
@@ -17,4 +19,6 @@ public interface IRecorder {
     void release();
 
     long getDurationInMills();
+
+    RecorderProperty getRecordProperty();
 }

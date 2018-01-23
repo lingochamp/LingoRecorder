@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+                android:layout_height="match_parent"
+>
+	
+	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:orientation="vertical"
+		android:layout_centerVertical="true"
+		tools:ignore="UselessParent">
+		
+		<Button
+			android:layout_width="200dp"
+			android:layout_height="45dp"
+			android:text="@string/record_demonstrate"
+			android:textAllCaps="false"
+			android:onClick="recordDemonstrate"
+			android:layout_gravity="center_horizontal"/>
+		
+		<Button
+			android:layout_width="200dp"
+			android:layout_height="45dp"
+			android:text="@string/custom_processors_demonstrate"
+			android:textAllCaps="false"
+			android:layout_gravity="center_horizontal"
+			android:onClick="processorsDemonstrate"
+			android:layout_marginTop="20dp"/>
+		
+		<Button
+			android:layout_width="200dp"
+			android:layout_height="45dp"
+			android:text="@string/flac_demonstrate"
+			android:textAllCaps="false"
+			android:layout_gravity="center_horizontal"
+			android:layout_marginTop="20dp"
+			android:onClick="flacDemonstrate"/>
+		
+		<Button
+			android:layout_width="200dp"
+			android:layout_height="45dp"
+			android:text="@string/across_process_processor_demonstrate"
+			android:textAllCaps="false"
+			android:id="@+id/btn_flac_sample"
+			android:layout_gravity="center_horizontal"
+			android:layout_marginTop="20dp"
+			android:onClick="acrossProcessDemonstrate"/>
+
+		<Button
+			android:layout_width="200dp"
+			android:layout_height="45dp"
+			android:text="@string/volume_demonstrate"
+			android:textAllCaps="false"
+			android:id="@+id/btn_volume_sample"
+			android:layout_gravity="center_horizontal"
+			android:layout_marginTop="20dp"
+			android:onClick="volumeDemonstrate" />
+	
+	</LinearLayout>
+
+</RelativeLayout>
