@@ -5,6 +5,11 @@ import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.support.annotation.NonNull;
 
+import com.liulishuo.engzo.lingorecorder.recorder.exception.RecorderException;
+import com.liulishuo.engzo.lingorecorder.recorder.exception.RecorderGetBufferSizeException;
+import com.liulishuo.engzo.lingorecorder.recorder.exception.RecorderInitException;
+import com.liulishuo.engzo.lingorecorder.recorder.exception.RecorderReadException;
+import com.liulishuo.engzo.lingorecorder.recorder.exception.RecorderStartException;
 import com.liulishuo.engzo.lingorecorder.utils.RecorderProperty;
 
 /**
@@ -27,16 +32,16 @@ public class AndroidRecorder implements IRecorder {
         } else if (this.recorderProperty.getBitsPerSample() == 8) {
             audioFormat = AudioFormat.ENCODING_PCM_8BIT;
         } else {
-            throw new IllegalStateException(
-                    "unknown bitsPerSample: " + this.recorderProperty.getBitsPerSample());
+            throw new RecorderException(
+                    "unsupported bitsPerSample: " + this.recorderProperty.getBitsPerSample());
         }
         if (this.recorderProperty.getChannels() == 1) {
             this.channels = AudioFormat.CHANNEL_IN_MONO;
         } else if (this.recorderProperty.getChannels() == 2) {
             this.channels = AudioFormat.CHANNEL_IN_STEREO;
         } else {
-            throw new IllegalStateException(
-                    "unknown channel: " + this.recorderProperty.getChannels());
+            throw new RecorderException(
+                    "unsupported channel: " + this.recorderProperty.getChannels());
         }
     }
 
@@ -49,22 +54,21 @@ public class AndroidRecorder implements IRecorder {
     @Override
     public void startRecording() throws Exception {
         int buffSize = getBufferSize();
-        if (AudioRecord.ERROR == getBufferSize())
-            throw new RecordException("get buffer size error");
+        if (getBufferSize() < 0)
+            throw new RecorderGetBufferSizeException(buffSize);
 
         recorder = new AudioRecord(MediaRecorder.AudioSource.MIC, recorderProperty.getSampleRate(),
-                channels,
-                        audioFormat, buffSize);
+                channels, audioFormat, buffSize);
 
         if (recorder.getState() != AudioRecord.STATE_INITIALIZED) {
-            throw new RecordException("init Android audioRecorder error");
+            throw new RecorderInitException();
         }
 
         payloadSize = 0;
         recorder.startRecording();
 
         if (recorder.getRecordingState() != AudioRecord.RECORDSTATE_RECORDING) {
-            throw new RecordException("start Android audioRecorder error");
+            throw new RecorderStartException();
         }
     }
 
@@ -72,7 +76,7 @@ public class AndroidRecorder implements IRecorder {
     public int read(@NonNull byte[] bytes, int buffSize) throws Exception {
         int read = recorder.read(bytes, 0, buffSize);
         if (read < 0) {
-            throw new RecordException("recorder read error " + read);
+            throw new RecorderReadException(read);
         }
         payloadSize += read;
         return read;
@@ -94,11 +98,5 @@ public class AndroidRecorder implements IRecorder {
     @Override
     public RecorderProperty getRecordProperty() {
         return recorderProperty;
-    }
-
-    private class RecordException extends Exception {
-        RecordException(String message) {
-            super(message);
-        }
     }
 }
