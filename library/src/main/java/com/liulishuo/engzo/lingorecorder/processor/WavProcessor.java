@@ -2,6 +2,8 @@ package com.liulishuo.engzo.lingorecorder.processor;
 
 import com.liulishuo.engzo.lingorecorder.utils.RecorderProperty;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.RandomAccessFile;
 
 /**
@@ -24,7 +26,13 @@ public class WavProcessor implements AudioProcessor {
     public void start() throws Exception {
         payloadSize = 0;
         // http://soundfile.sapp.org/doc/WaveFormat/
-        writer = new RandomAccessFile(filePath, "rw");
+        try {
+            writer = new RandomAccessFile(filePath, "rw");
+        } catch (FileNotFoundException ex) {
+            // Maybe the parent directory doesn't exist? Try creating it first.
+            new File(filePath).getParentFile().mkdirs();
+            writer = new RandomAccessFile(filePath, "rw");
+        }
         writer.setLength(0); // Set file length to 0, to prevent unexpected behavior in case the file already existed
         writer.writeBytes("RIFF");
         writer.writeInt(0); // Final file size not known yet, write 0
