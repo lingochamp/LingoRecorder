@@ -317,7 +317,7 @@ public class LingoRecorder {
                     wavProcessor.release();
                 }
 
-                //notify stop record
+                // notify recorder stop
                 Message message = Message.obtain();
                 message.what = MESSAGE_RECORD_STOP;
                 Bundle bundle = new Bundle();
@@ -331,7 +331,7 @@ public class LingoRecorder {
                     cancel = true;
                 }
 
-                //ensure processors' tread has been end
+                // try to end processor thread
                 try {
                     processorQueue.put("end");
                     if (cancel) {
@@ -342,7 +342,7 @@ public class LingoRecorder {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                //notify processors end
+                // notify processor stop
                 Message msg = Message.obtain();
                 msg.what = MESSAGE_PROCESS_STOP;
                 if (recordException != null) {
