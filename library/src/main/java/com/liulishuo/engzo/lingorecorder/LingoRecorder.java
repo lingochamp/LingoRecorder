@@ -327,6 +327,10 @@ public class LingoRecorder {
                 message.obj = recordException;
                 handler.sendMessage(message);
 
+                if (recordException != null) {
+                    cancel = true;
+                }
+
                 //ensure processors' tread has been end
                 try {
                     processorQueue.put("end");
@@ -341,7 +345,11 @@ public class LingoRecorder {
                 //notify processors end
                 Message msg = Message.obtain();
                 msg.what = MESSAGE_PROCESS_STOP;
-                msg.obj = processorsError;
+                if (recordException != null) {
+                    msg.obj = new RecordErrorCancelProcessingException(processorsError);
+                } else {
+                    msg.obj = processorsError;
+                }
                 handler.sendMessage(msg);
 
                 recorder.release();
@@ -414,6 +422,13 @@ public class LingoRecorder {
         }
 
         public CancelProcessingException(Throwable throwable) {
+            super(throwable);
+        }
+    }
+
+    public static class RecordErrorCancelProcessingException extends CancelProcessingException {
+
+        public RecordErrorCancelProcessingException(Throwable throwable) {
             super(throwable);
         }
     }
