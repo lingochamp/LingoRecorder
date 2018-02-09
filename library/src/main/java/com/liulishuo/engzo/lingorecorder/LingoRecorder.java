@@ -167,6 +167,10 @@ public class LingoRecorder {
         audioProcessorMap.put(processorId, processor);
     }
 
+    public AudioProcessor remove(String processorId) {
+        return audioProcessorMap.remove(processorId);
+    }
+
     public interface OnRecordStopListener {
 
         class Result {
