@@ -35,7 +35,6 @@ public class LingoRecorder {
 
     private final static int MESSAGE_RECORD_STOP = 1;
     private final static int MESSAGE_PROCESS_STOP = 2;
-    private final static int MESSAGE_AVAILABLE = 3;
     private final static int MESSAGE_VOLUME = 4;
     private final static String KEY_DURATION = "duration";
     private final static String KEY_FILEPATH = "filePath";
@@ -286,6 +285,8 @@ public class LingoRecorder {
                     wavProcessor.release();
                 }
 
+                recorder.release();
+
                 // notify recorder stop
                 Message message = Message.obtain();
                 message.what = MESSAGE_RECORD_STOP;
@@ -320,9 +321,6 @@ public class LingoRecorder {
                     msg.obj = processorsError;
                 }
                 handler.sendMessage(msg);
-
-                recorder.release();
-                handler.sendEmptyMessage(MESSAGE_AVAILABLE);
             }
         }
 
@@ -404,11 +402,8 @@ public class LingoRecorder {
                     handleRecordStop(msg);
                     break;
                 case MESSAGE_PROCESS_STOP:
-                    handleProcessStop(msg);
-                    break;
-                case MESSAGE_AVAILABLE:
                     mLingoRecorder.available = true;
-                    LOG.d("record available now");
+                    handleProcessStop(msg);
                     break;
                 case MESSAGE_VOLUME:
                     if (mLingoRecorder.onVolumeListener != null) {
