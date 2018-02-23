@@ -42,7 +42,7 @@ public class LingoRecorderTest {
         new File(filePathB).delete();
 
         lingoRecorder.put("wav", new WavProcessor(filePathA));
-        lingoRecorder.put("time", new TimerProcessor(1000));
+        lingoRecorder.put("time", new TimerProcessor(lingoRecorder.getRecorderProperty(), 1000));
 
         lingoRecorder.start(filePathB);
 
@@ -105,7 +105,7 @@ public class LingoRecorderTest {
 
             }
         });
-        lingoRecorder.put("timer", new TimerProcessor(1000));
+        lingoRecorder.put("timer", new TimerProcessor(lingoRecorder.getRecorderProperty(), 1000));
 
         final CountDownLatch countDownLatch = new CountDownLatch(2);
 
