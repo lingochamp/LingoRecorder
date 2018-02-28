@@ -34,50 +34,6 @@ public class LingoRecorderTest {
     }
 
     @Test
-    public void testStartWithSpecifyOutputFilePath() {
-        final String filePathA = "/sdcard/test.wav";
-        final String filePathB = "/sdcard/test2.wav";
-
-        new File(filePathA).delete();
-        new File(filePathB).delete();
-
-        lingoRecorder.put("wav", new WavProcessor(filePathA));
-        lingoRecorder.put("time", new TimerProcessor(1000));
-
-        lingoRecorder.start(filePathB);
-
-        final CountDownLatch countDownLatch = new CountDownLatch(2);
-
-        final Long[] fileSizeArray = new Long[2];
-
-        lingoRecorder.setOnRecordStopListener(new LingoRecorder.OnRecordStopListener() {
-            @Override
-            public void onRecordStop(Throwable throwable, Result result) {
-                fileSizeArray[0] = getFileSize(filePathB);
-                countDownLatch.countDown();
-            }
-        });
-
-        lingoRecorder.setOnProcessStopListener(new LingoRecorder.OnProcessStopListener() {
-            @Override
-            public void onProcessStop(Throwable throwable, Map<String, AudioProcessor> map) {
-                fileSizeArray[1] = getFileSize(filePathA);
-                countDownLatch.countDown();
-            }
-        });
-
-        try {
-            countDownLatch.await();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        Assert.assertTrue(fileSizeArray[0] != 0);
-        Assert.assertTrue(fileSizeArray[1] != 0);
-        Assert.assertEquals(fileSizeArray[0], fileSizeArray[1]);
-    }
-
-    @Test
     public void testRecorderStopWhenProcessorThrowException() {
         lingoRecorder.put("exception", new AudioProcessor() {
             @Override
@@ -105,7 +61,7 @@ public class LingoRecorderTest {
 
             }
         });
-        lingoRecorder.put("timer", new TimerProcessor(1000));
+        lingoRecorder.put("timer", new TimerProcessor(lingoRecorder.getRecorderProperty(), 1000));
 
         final CountDownLatch countDownLatch = new CountDownLatch(2);
 
