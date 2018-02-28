@@ -35,7 +35,6 @@ public class LingoRecorder {
 
     private final static int MESSAGE_RECORD_STOP = 1;
     private final static int MESSAGE_PROCESS_STOP = 2;
-    private final static int MESSAGE_AVAILABLE = 3;
     private final static int MESSAGE_VOLUME = 4;
     private final static String KEY_DURATION = "duration";
     private final static String KEY_FILEPATH = "filePath";
@@ -46,52 +45,6 @@ public class LingoRecorder {
     private IVolumeCalculator volumeCalculator;
 
     private boolean available = true;
-
-    private final Handler handler = new Handler(Looper.getMainLooper()) {
-
-        @Override
-        public void handleMessage(Message msg) {
-            super.handleMessage(msg);
-
-            switch (msg.what) {
-                case MESSAGE_RECORD_STOP:
-                    handleRecordStop(msg);
-                    break;
-                case MESSAGE_PROCESS_STOP:
-                    handleProcessStop(msg);
-                    break;
-                case MESSAGE_AVAILABLE:
-                    available = true;
-                    LOG.d("record available now");
-                    break;
-                case MESSAGE_VOLUME:
-                    if (onVolumeListener != null) {
-                        onVolumeListener.onVolume((Double) msg.obj);
-                    }
-                    break;
-            }
-        }
-
-        private void handleRecordStop(Message msg) {
-            long durationInMills = msg.getData().getLong(KEY_DURATION, -1);
-            String outputFilePath = msg.getData().getString(KEY_FILEPATH);
-            if (onRecordStopListener != null) {
-                OnRecordStopListener.Result result = new OnRecordStopListener.Result();
-                result.durationInMills = durationInMills;
-                result.outputFilePath = outputFilePath;
-                onRecordStopListener.onRecordStop((Throwable) msg.obj, result);
-            }
-            internalRecorder = null;
-            LOG.d("record end");
-        }
-
-        private void handleProcessStop(Message msg) {
-            if (onProcessStopListener != null) {
-                onProcessStopListener.onProcessStop((Throwable) msg.obj, audioProcessorMap);
-            }
-            LOG.d("process end");
-        }
-    };
 
     private final RecorderProperty recorderProperty;
 
@@ -124,7 +77,18 @@ public class LingoRecorder {
         } else {
             recorder = new AndroidRecorder(recorderProperty);
         }
-        internalRecorder = new InternalRecorder(recorder, outputFilePath, audioProcessorMap.values(), handler, volumeCalculator);
+
+        // clone audioProcessorMap and skip null processor
+        Map<String, AudioProcessor> immutableMap = new HashMap<>(audioProcessorMap.size());
+        for (String key : audioProcessorMap.keySet()) {
+            AudioProcessor audioProcessor = audioProcessorMap.get(key);
+            if (audioProcessor != null) {
+                immutableMap.put(key, audioProcessor);
+            }
+        }
+        internalRecorder = new InternalRecorder(recorder, outputFilePath, immutableMap.values(),
+                new RecorderHandler(this, immutableMap),
+                volumeCalculator);
         internalRecorder.start();
     }
 
@@ -165,6 +129,10 @@ public class LingoRecorder {
 
     public void put(String processorId, AudioProcessor processor) {
         audioProcessorMap.put(processorId, processor);
+    }
+
+    public AudioProcessor remove(String processorId) {
+        return audioProcessorMap.remove(processorId);
     }
 
     public interface OnRecordStopListener {
@@ -317,7 +285,9 @@ public class LingoRecorder {
                     wavProcessor.release();
                 }
 
-                //notify stop record
+                recorder.release();
+
+                // notify recorder stop
                 Message message = Message.obtain();
                 message.what = MESSAGE_RECORD_STOP;
                 Bundle bundle = new Bundle();
@@ -327,7 +297,11 @@ public class LingoRecorder {
                 message.obj = recordException;
                 handler.sendMessage(message);
 
-                //ensure processors' tread has been end
+                if (recordException != null) {
+                    cancel = true;
+                }
+
+                // try to end processor thread
                 try {
                     processorQueue.put("end");
                     if (cancel) {
@@ -338,14 +312,15 @@ public class LingoRecorder {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                //notify processors end
+                // notify processor stop
                 Message msg = Message.obtain();
                 msg.what = MESSAGE_PROCESS_STOP;
-                msg.obj = processorsError;
+                if (recordException != null) {
+                    msg.obj = new RecordErrorCancelProcessingException(processorsError);
+                } else {
+                    msg.obj = processorsError;
+                }
                 handler.sendMessage(msg);
-
-                recorder.release();
-                handler.sendEmptyMessage(MESSAGE_AVAILABLE);
             }
         }
 
@@ -405,7 +380,59 @@ public class LingoRecorder {
                 throw new CancelProcessingException();
             }
         }
-    };
+    }
+
+    private static class RecorderHandler extends Handler {
+
+        private LingoRecorder mLingoRecorder;
+        private Map<String, AudioProcessor> mAudioProcessorMap;
+
+        RecorderHandler(LingoRecorder lingoRecorder, Map<String, AudioProcessor> audioProcessorMap) {
+            super(Looper.getMainLooper());
+            mLingoRecorder = lingoRecorder;
+            mAudioProcessorMap = audioProcessorMap;
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+
+            switch (msg.what) {
+                case MESSAGE_RECORD_STOP:
+                    handleRecordStop(msg);
+                    break;
+                case MESSAGE_PROCESS_STOP:
+                    mLingoRecorder.available = true;
+                    handleProcessStop(msg);
+                    break;
+                case MESSAGE_VOLUME:
+                    if (mLingoRecorder.onVolumeListener != null) {
+                        mLingoRecorder.onVolumeListener.onVolume((Double) msg.obj);
+                    }
+                    break;
+            }
+        }
+
+        private void handleRecordStop(Message msg) {
+            long durationInMills = msg.getData().getLong(KEY_DURATION, -1);
+            String outputFilePath = msg.getData().getString(KEY_FILEPATH);
+            if (mLingoRecorder.onRecordStopListener != null) {
+                OnRecordStopListener.Result result = new OnRecordStopListener.Result();
+                result.durationInMills = durationInMills;
+                result.outputFilePath = outputFilePath;
+                mLingoRecorder.onRecordStopListener.onRecordStop((Throwable) msg.obj, result);
+            }
+            mLingoRecorder.internalRecorder = null;
+            LOG.d("record end");
+        }
+
+        private void handleProcessStop(Message msg) {
+            if (mLingoRecorder.onProcessStopListener != null) {
+                mLingoRecorder.onProcessStopListener.onProcessStop((Throwable) msg.obj, mAudioProcessorMap);
+            }
+            LOG.d("process end");
+        }
+    }
 
     public static class CancelProcessingException extends RuntimeException {
 
@@ -414,6 +441,13 @@ public class LingoRecorder {
         }
 
         public CancelProcessingException(Throwable throwable) {
+            super(throwable);
+        }
+    }
+
+    public static class RecordErrorCancelProcessingException extends CancelProcessingException {
+
+        public RecordErrorCancelProcessingException(Throwable throwable) {
             super(throwable);
         }
     }

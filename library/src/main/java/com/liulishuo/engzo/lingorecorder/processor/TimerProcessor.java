@@ -1,29 +1,41 @@
 package com.liulishuo.engzo.lingorecorder.processor;
 
+import com.liulishuo.engzo.lingorecorder.utils.RecorderProperty;
+
 public class TimerProcessor implements AudioProcessor {
 
     private long mTimeInMills = Integer.MAX_VALUE;
-    private long startTime = 0;
 
-    private boolean needExit = false;
+    private RecorderProperty mRecorderProperty;
 
-    public TimerProcessor(long timeInMills) {
+    private long payloadSize = 0L;
+
+    public TimerProcessor(RecorderProperty recorderProperty, long timeInMills) {
+        mRecorderProperty = recorderProperty;
         mTimeInMills = timeInMills;
+    }
+
+    public void setTimeInMills(long timeInMills) {
+        this.mTimeInMills = timeInMills;
     }
 
     @Override
     public void start() {
-        startTime = System.currentTimeMillis();
+        payloadSize = 0;
     }
 
     @Override
     public void flow(byte[] bytes, int size) {
-        needExit = System.currentTimeMillis() - startTime >= mTimeInMills;
+        payloadSize += size;
     }
 
     @Override
     public boolean needExit() {
-        return needExit;
+        long payloadSizeInBits = payloadSize * 8;
+        long durationInMills = (long)
+                (payloadSizeInBits * 1000.0 / mRecorderProperty.getBitsPerSample()
+                        / mRecorderProperty.getSampleRate() / mRecorderProperty.getChannels());
+        return durationInMills >= mTimeInMills;
     }
 
     @Override
