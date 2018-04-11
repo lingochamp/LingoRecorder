@@ -47,15 +47,18 @@ public class AndroidRecorder implements IRecorder {
 
     @Override
     public int getBufferSize() {
-        return 2 * AudioRecord.getMinBufferSize(recorderProperty.getSampleRate(), channels,
+        int ret = AudioRecord.getMinBufferSize(recorderProperty.getSampleRate(), channels,
                 audioFormat);
+        if (ret > 0) {
+            return 2 * ret;
+        } else {
+            throw new RecorderGetBufferSizeException(ret);
+        }
     }
 
     @Override
     public void startRecording() throws Exception {
         int buffSize = getBufferSize();
-        if (getBufferSize() < 0)
-            throw new RecorderGetBufferSizeException(buffSize);
 
         recorder = new AudioRecord(MediaRecorder.AudioSource.MIC, recorderProperty.getSampleRate(),
                 channels, audioFormat, buffSize);
