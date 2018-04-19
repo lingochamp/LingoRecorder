@@ -418,6 +418,7 @@ public class LingoRecorder {
 
             switch (msg.what) {
                 case MESSAGE_RECORD_STOP:
+                    mLingoRecorder.internalRecorder = null;
                     handleRecordStop(msg);
                     break;
                 case MESSAGE_PROCESS_STOP:
@@ -441,7 +442,6 @@ public class LingoRecorder {
                 result.outputFilePath = outputFilePath;
                 mLingoRecorder.onRecordStopListener.onRecordStop((Throwable) msg.obj, result);
             }
-            mLingoRecorder.internalRecorder = null;
             LOG.d("record end");
         }
 
