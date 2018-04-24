@@ -19,7 +19,12 @@ public class WavProcessor implements AudioProcessor {
     private RecorderProperty recordProperty;
 
     public WavProcessor(String filePath) {
+        this(filePath, new RecorderProperty());
+    }
+
+    public WavProcessor(String filePath, RecorderProperty recordProperty) {
         this.filePath = filePath;
+        this.recordProperty = recordProperty;
     }
 
     @Override
@@ -92,16 +97,11 @@ public class WavProcessor implements AudioProcessor {
         }
     }
 
-    public void setFilePath(String filePath) {
-        this.filePath = filePath;
-    }
-
     public String getFilePath() {
         return filePath;
     }
 
-    public void setRecordProperty(RecorderProperty recordProperty) {
-        this.recordProperty = recordProperty;
+    public RecorderProperty getRecordProperty() {
+        return recordProperty;
     }
-
 }

@@ -240,8 +240,7 @@ public class LingoRecorder {
                 recorder.startRecording();
 
                 if (outputFilePath != null) {
-                    wavProcessor = new WavProcessor(outputFilePath);
-                    wavProcessor.setRecordProperty(recorder.getRecordProperty());
+                    wavProcessor = new WavProcessor(outputFilePath, recorder.getRecordProperty());
                     wavProcessor.start();
                 }
                 while (shouldRun) {

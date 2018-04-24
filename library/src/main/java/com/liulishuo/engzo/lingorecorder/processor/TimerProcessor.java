@@ -4,19 +4,19 @@ import com.liulishuo.engzo.lingorecorder.utils.RecorderProperty;
 
 public class TimerProcessor implements AudioProcessor {
 
-    private long mTimeInMills = Integer.MAX_VALUE;
+    private long mTimeInMills;
 
     private RecorderProperty mRecorderProperty;
 
     private long payloadSize = 0L;
 
+    public TimerProcessor(long timeInMills) {
+        this(new RecorderProperty(), timeInMills);
+    }
+
     public TimerProcessor(RecorderProperty recorderProperty, long timeInMills) {
         mRecorderProperty = recorderProperty;
         mTimeInMills = timeInMills;
-    }
-
-    public void setTimeInMills(long timeInMills) {
-        this.mTimeInMills = timeInMills;
     }
 
     @Override
