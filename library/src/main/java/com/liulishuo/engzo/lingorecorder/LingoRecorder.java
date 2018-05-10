@@ -78,6 +78,14 @@ public class LingoRecorder {
     }
 
     public void start(String outputFilePath) {
+        if (internalRecorder != null || isProcessing) {
+            if (internalRecorder != null) {
+                LOG.e("start fail recorder is recording");
+            } else {
+                LOG.e("start fail recorder is processing");
+            }
+            return;
+        }
         LOG.d("start record");
         IRecorder recorder = null;
         if (wavFilePath != null) {

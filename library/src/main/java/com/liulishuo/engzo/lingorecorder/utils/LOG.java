@@ -24,4 +24,10 @@ public class LOG {
             Log.e(TAG, Log.getStackTraceString(throwable));
         }
     }
+
+    public static void e(String message) {
+        if (isEnable && !TextUtils.isEmpty(message)) {
+            Log.e(TAG, message);
+        }
+    }
 }
