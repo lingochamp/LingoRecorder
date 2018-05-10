@@ -46,6 +46,7 @@ public class LingoRecorder {
     private IVolumeCalculator volumeCalculator;
 
     private boolean available = true;
+    private boolean isProcessing = false;
 
     private final RecorderProperty recorderProperty;
 
@@ -55,6 +56,15 @@ public class LingoRecorder {
         this.recorderProperty = new RecorderProperty();
     }
 
+    public boolean isProcessing() {
+        return isProcessing;
+    }
+
+    /**
+     * instead of isAvailable please use isProcessing
+     * @link isProcessing()
+     */
+    @Deprecated
     public boolean isAvailable() {
         return available;
     }
@@ -90,6 +100,7 @@ public class LingoRecorder {
         internalRecorder = new InternalRecorder(recorder, outputFilePath, immutableMap.values(),
                 new RecorderHandler(this, immutableMap),
                 volumeCalculator);
+        isProcessing = true;
         internalRecorder.start();
     }
 
@@ -422,6 +433,7 @@ public class LingoRecorder {
                     break;
                 case MESSAGE_PROCESS_STOP:
                     mLingoRecorder.available = true;
+                    mLingoRecorder.isProcessing = false;
                     handleProcessStop(msg);
                     break;
                 case MESSAGE_VOLUME:

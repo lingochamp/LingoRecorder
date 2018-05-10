@@ -75,14 +75,12 @@ public class RecordDemonstrateActivity extends RecordActivity {
     }
 
     private void handleRecorderBtn() {
-        if (lingoRecorder.isAvailable()) {
-            if (lingoRecorder.isRecording()) {
-                lingoRecorder.stop();
-            } else {
-                lingoRecorder.start(etOutputFile.getText().toString());
-                btnRecord.setText(R.string.stop_record);
-                btnPlay.setEnabled(false);
-            }
+        if (lingoRecorder.isRecording()) {
+            lingoRecorder.stop();
+        } else if (!lingoRecorder.isProcessing()) {
+            lingoRecorder.start(etOutputFile.getText().toString());
+            btnRecord.setText(R.string.stop_record);
+            btnPlay.setEnabled(false);
         }
     }
 
