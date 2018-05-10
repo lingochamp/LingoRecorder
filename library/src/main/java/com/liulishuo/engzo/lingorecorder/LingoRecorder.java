@@ -61,8 +61,8 @@ public class LingoRecorder {
     }
 
     /**
-     * instead of isAvailable please use isProcessing
-     * @link isProcessing()
+     *
+     * @deprecated use {@link #isProcessing()} instead
      */
     @Deprecated
     public boolean isAvailable() {
