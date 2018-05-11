@@ -73,18 +73,18 @@ public class LingoRecorder {
         return internalRecorder != null;
     }
 
-    public void start() {
-        start(null);
+    public boolean start() {
+        return start(null);
     }
 
-    public void start(String outputFilePath) {
+    public boolean start(String outputFilePath) {
         if (internalRecorder != null || isProcessing) {
             if (internalRecorder != null) {
                 LOG.e("start fail recorder is recording");
             } else {
                 LOG.e("start fail recorder is processing");
             }
-            return;
+            return false;
         }
         LOG.d("start record");
         IRecorder recorder = null;
@@ -110,6 +110,7 @@ public class LingoRecorder {
                 volumeCalculator);
         isProcessing = true;
         internalRecorder.start();
+        return true;
     }
 
     public void stop() {
