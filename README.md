@@ -112,7 +112,6 @@ Demo 中提供了相关示例，效果图：
 Gradle:
 
 ```
-
 compile 'com.github.lingochamp:LingoRecorder:1.2.1-SNAPSHOT'
 
 ```
