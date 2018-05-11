@@ -46,6 +46,7 @@ public class LingoRecorder {
     private IVolumeCalculator volumeCalculator;
 
     private boolean available = true;
+    private boolean isProcessing = false;
 
     private final RecorderProperty recorderProperty;
 
@@ -55,6 +56,15 @@ public class LingoRecorder {
         this.recorderProperty = new RecorderProperty();
     }
 
+    public boolean isProcessing() {
+        return isProcessing;
+    }
+
+    /**
+     *
+     * @deprecated use {@link #isProcessing()} instead
+     */
+    @Deprecated
     public boolean isAvailable() {
         return available;
     }
@@ -63,11 +73,19 @@ public class LingoRecorder {
         return internalRecorder != null;
     }
 
-    public void start() {
-        start(null);
+    public boolean start() {
+        return start(null);
     }
 
-    public void start(String outputFilePath) {
+    public boolean start(String outputFilePath) {
+        if (internalRecorder != null || isProcessing) {
+            if (internalRecorder != null) {
+                LOG.e("start fail recorder is recording");
+            } else {
+                LOG.e("start fail recorder is processing");
+            }
+            return false;
+        }
         LOG.d("start record");
         IRecorder recorder = null;
         if (wavFilePath != null) {
@@ -90,7 +108,9 @@ public class LingoRecorder {
         internalRecorder = new InternalRecorder(recorder, outputFilePath, immutableMap.values(),
                 new RecorderHandler(this, immutableMap),
                 volumeCalculator);
+        isProcessing = true;
         internalRecorder.start();
+        return true;
     }
 
     public void stop() {
@@ -422,6 +442,7 @@ public class LingoRecorder {
                     break;
                 case MESSAGE_PROCESS_STOP:
                     mLingoRecorder.available = true;
+                    mLingoRecorder.isProcessing = false;
                     handleProcessStop(msg);
                     break;
                 case MESSAGE_VOLUME:

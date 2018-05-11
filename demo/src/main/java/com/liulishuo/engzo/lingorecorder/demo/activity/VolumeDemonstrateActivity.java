@@ -55,14 +55,12 @@ public class VolumeDemonstrateActivity extends RecordActivity {
     }
 
     private void handleRecorderBtn() {
-        if (lingoRecorder.isAvailable()) {
-            if (lingoRecorder.isRecording()) {
-                lingoRecorder.stop();
-            } else {
-                lingoRecorder.start();
-                volumeView.startWave();
-                btnRecord.setText(R.string.stop_record);
-            }
+        if (lingoRecorder.isRecording()) {
+            lingoRecorder.stop();
+        } else if (!lingoRecorder.isProcessing()){
+            lingoRecorder.start();
+            volumeView.startWave();
+            btnRecord.setText(R.string.stop_record);
         }
     }
 
