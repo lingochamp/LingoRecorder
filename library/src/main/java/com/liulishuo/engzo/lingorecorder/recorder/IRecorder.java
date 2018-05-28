@@ -10,7 +10,7 @@ import com.liulishuo.engzo.lingorecorder.utils.RecorderProperty;
 
 public interface IRecorder {
 
-    int getBufferSize();
+    int getBufferSize() throws Throwable;
 
     void startRecording() throws Throwable;
 

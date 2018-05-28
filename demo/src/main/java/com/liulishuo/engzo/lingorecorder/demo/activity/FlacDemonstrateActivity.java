@@ -64,10 +64,9 @@ public class FlacDemonstrateActivity extends RecordActivity {
             @Override
             public void onClick(View v) {
                 if (!checkRecordPermission()) return;
-                if (!lingoRecorder.isAvailable()) return;
                 if (lingoRecorder.isRecording()) {
                     lingoRecorder.stop();
-                } else {
+                } else if (!lingoRecorder.isProcessing()){
                     outputFile = etOutput.getText().toString();
                     flacProcessor.setFilePath(outputFile);
                     lingoRecorder.start();

@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.support.annotation.NonNull;
 
 import com.liulishuo.engzo.lingorecorder.processor.AudioProcessor;
 import com.liulishuo.engzo.lingorecorder.processor.WavProcessor;
@@ -45,6 +46,7 @@ public class LingoRecorder {
     private IVolumeCalculator volumeCalculator;
 
     private boolean available = true;
+    private boolean isProcessing = false;
 
     private final RecorderProperty recorderProperty;
 
@@ -54,6 +56,15 @@ public class LingoRecorder {
         this.recorderProperty = new RecorderProperty();
     }
 
+    public boolean isProcessing() {
+        return isProcessing;
+    }
+
+    /**
+     *
+     * @deprecated use {@link #isProcessing()} instead
+     */
+    @Deprecated
     public boolean isAvailable() {
         return available;
     }
@@ -62,11 +73,19 @@ public class LingoRecorder {
         return internalRecorder != null;
     }
 
-    public void start() {
-        start(null);
+    public boolean start() {
+        return start(null);
     }
 
-    public void start(String outputFilePath) {
+    public boolean start(String outputFilePath) {
+        if (internalRecorder != null || isProcessing) {
+            if (internalRecorder != null) {
+                LOG.e("start fail recorder is recording");
+            } else {
+                LOG.e("start fail recorder is processing");
+            }
+            return false;
+        }
         LOG.d("start record");
         IRecorder recorder = null;
         if (wavFilePath != null) {
@@ -89,7 +108,9 @@ public class LingoRecorder {
         internalRecorder = new InternalRecorder(recorder, outputFilePath, immutableMap.values(),
                 new RecorderHandler(this, immutableMap),
                 volumeCalculator);
+        isProcessing = true;
         internalRecorder.start();
+        return true;
     }
 
     public void stop() {
@@ -224,45 +245,39 @@ public class LingoRecorder {
         @Override
         public void run() {
             shouldRun = true;
-            int buffSize = recorder.getBufferSize();
-
-            byte[] bytes = new byte[buffSize];
-
-            LinkedBlockingQueue<Object> processorQueue = new LinkedBlockingQueue<>();
-            Thread processorThread = createProcessThread(processorQueue);
-            processorThread.start();
 
             WavProcessor wavProcessor = null;
-            if (outputFilePath != null) {
-                wavProcessor = new WavProcessor(outputFilePath);
-                wavProcessor.setRecordProperty(recorder.getRecordProperty());
-            }
-
             Throwable recordException = null;
+            ProcessThread processThread = null;
 
             try {
+                int buffSize = recorder.getBufferSize();
+                byte[] bytes = new byte[buffSize];
+
+                processThread = new ProcessThread();
+                processThread.start();
+
                 recorder.startRecording();
-                if (wavProcessor != null) {
+
+                if (outputFilePath != null) {
+                    wavProcessor = new WavProcessor(outputFilePath, recorder.getRecordProperty());
                     wavProcessor.start();
                 }
                 while (shouldRun) {
                     int result = recorder.read(bytes, buffSize);
                     LOG.d("read buffer result = " + result);
                     if (result > 0) {
-                        WrapBuffer wrapBuffer = new WrapBuffer();
-                        wrapBuffer.setBytes(Arrays.copyOf(bytes, bytes.length));
-                        wrapBuffer.setSize(result);
-
                         if (volumeCalculator != null) {
                             final long startCalculateTime = System.currentTimeMillis();
-                            final double volume = volumeCalculator.onAudioChunk(wrapBuffer.getBytes(),
-                                    wrapBuffer.getSize(), recorder.getRecordProperty().getBitsPerSample());
+                            final double volume = volumeCalculator.onAudioChunk(bytes,
+                                    result, recorder.getRecordProperty().getBitsPerSample());
                             final long calculateDuration = System.currentTimeMillis() - startCalculateTime;
                             LOG.d("duration of calculating chunk volume: " + calculateDuration);
                             handler.sendMessage(handler.obtainMessage(MESSAGE_VOLUME, volume));
                         }
 
-                        processorQueue.put(wrapBuffer);
+                        processThread.process(bytes, result);
+
                         if (wavProcessor != null) {
                             wavProcessor.flow(bytes, result);
                         }
@@ -302,16 +317,10 @@ public class LingoRecorder {
                 }
 
                 // try to end processor thread
-                try {
-                    processorQueue.put("end");
-                    if (cancel) {
-                        processorThread.interrupt();
-                    }
-                    processorThread.join();
-                    LOG.d("processorThread end");
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                if (processThread != null) {
+                    processThread.end(cancel);
                 }
+
                 // notify processor stop
                 Message msg = Message.obtain();
                 msg.what = MESSAGE_PROCESS_STOP;
@@ -324,55 +333,84 @@ public class LingoRecorder {
             }
         }
 
-        private Thread createProcessThread(final LinkedBlockingQueue<Object> processorQueue) {
-            return new Thread("process audio data") {
+        class ProcessThread extends Thread {
 
-                @Override
-                public void run() {
-                    super.run();
-                    Object value;
-                    try {
-                        for (AudioProcessor audioProcessor : audioProcessors) {
-                            checkIfNeedCancel();
-                            audioProcessor.start();
-                        }
-                        while ((value = processorQueue.take()) != null) {
-                            if (value instanceof WrapBuffer) {
-                                for (AudioProcessor audioProcessor : audioProcessors) {
-                                    checkIfNeedCancel();
-                                    WrapBuffer wrapBuffer = (WrapBuffer) value;
-                                    audioProcessor.flow(wrapBuffer.getBytes(), wrapBuffer.getSize());
-                                }
+            private LinkedBlockingQueue<Object> processorQueue;
 
-                                for (AudioProcessor audioProcessor : audioProcessors) {
-                                    checkIfNeedCancel();
-                                    if (audioProcessor.needExit()) {
-                                        LOG.d(String.format("exit because %s", audioProcessor));
-                                        shouldRun = false;
-                                        break;
-                                    }
-                                }
-                            } else {
-                                break;
+            ProcessThread() {
+                this(new LinkedBlockingQueue<>());
+            }
+
+            ProcessThread(final LinkedBlockingQueue<Object> processorQueue) {
+                super("processThread");
+                this.processorQueue = processorQueue;
+            }
+
+            void process(@NonNull byte[] bytes, int buffSize) throws InterruptedException {
+                WrapBuffer wrapBuffer = new WrapBuffer();
+                wrapBuffer.setBytes(Arrays.copyOf(bytes, bytes.length));
+                wrapBuffer.setSize(buffSize);
+                processorQueue.put(wrapBuffer);
+            }
+
+            void end(boolean cancel) {
+                try {
+                    processorQueue.put("end");
+                    if (cancel) {
+                        interrupt();
+                    }
+                    join();
+                    LOG.d("processorThread end");
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void run() {
+                super.run();
+                Object value;
+                try {
+                    for (AudioProcessor audioProcessor : audioProcessors) {
+                        checkIfNeedCancel();
+                        audioProcessor.start();
+                    }
+                    while ((value = processorQueue.take()) != null) {
+                        if (value instanceof WrapBuffer) {
+                            for (AudioProcessor audioProcessor : audioProcessors) {
+                                checkIfNeedCancel();
+                                WrapBuffer wrapBuffer = (WrapBuffer) value;
+                                audioProcessor.flow(wrapBuffer.getBytes(), wrapBuffer.getSize());
                             }
-                        }
-                        for (AudioProcessor audioProcessor : audioProcessors) {
-                            checkIfNeedCancel();
-                            audioProcessor.end();
-                        }
-                    } catch (InterruptedException e) {
-                        processorsError = new CancelProcessingException(e);
-                    } catch (Throwable e) {
-                        processorsError = e;
-                        LOG.e(e);
-                    } finally {
-                        shouldRun = false;
-                        for (AudioProcessor audioProcessor : audioProcessors) {
-                            audioProcessor.release();
+
+                            for (AudioProcessor audioProcessor : audioProcessors) {
+                                checkIfNeedCancel();
+                                if (audioProcessor.needExit()) {
+                                    LOG.d(String.format("exit because %s", audioProcessor));
+                                    shouldRun = false;
+                                    break;
+                                }
+                            }
+                        } else {
+                            break;
                         }
                     }
+                    for (AudioProcessor audioProcessor : audioProcessors) {
+                        checkIfNeedCancel();
+                        audioProcessor.end();
+                    }
+                } catch (InterruptedException e) {
+                    processorsError = new CancelProcessingException(e);
+                } catch (Throwable e) {
+                    processorsError = e;
+                    LOG.e(e);
+                } finally {
+                    shouldRun = false;
+                    for (AudioProcessor audioProcessor : audioProcessors) {
+                        audioProcessor.release();
+                    }
                 }
-            };
+            }
         }
 
         private void checkIfNeedCancel() {
@@ -399,10 +437,12 @@ public class LingoRecorder {
 
             switch (msg.what) {
                 case MESSAGE_RECORD_STOP:
+                    mLingoRecorder.internalRecorder = null;
                     handleRecordStop(msg);
                     break;
                 case MESSAGE_PROCESS_STOP:
                     mLingoRecorder.available = true;
+                    mLingoRecorder.isProcessing = false;
                     handleProcessStop(msg);
                     break;
                 case MESSAGE_VOLUME:
@@ -422,7 +462,6 @@ public class LingoRecorder {
                 result.outputFilePath = outputFilePath;
                 mLingoRecorder.onRecordStopListener.onRecordStop((Throwable) msg.obj, result);
             }
-            mLingoRecorder.internalRecorder = null;
             LOG.d("record end");
         }
 

@@ -36,10 +36,9 @@ public class AcrossProcessDemonstrateActivity extends RecordActivity {
             @Override
             public void onClick(View v) {
                 if (!checkRecordPermission()) return;
-                if (!lingoRecorder.isAvailable()) return;
                 if (lingoRecorder.isRecording()) {
                     lingoRecorder.stop();
-                } else {
+                } else if (!lingoRecorder.isProcessing()){
                     lingoRecorder.start();
                     tvResult.setText(getString(R.string.scorer_result, ""));
                     btnScorer.setText(R.string.stop_scorer);

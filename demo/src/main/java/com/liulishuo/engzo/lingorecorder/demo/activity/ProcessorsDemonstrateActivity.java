@@ -71,13 +71,11 @@ public class ProcessorsDemonstrateActivity extends RecordActivity {
             @Override
             public void onClick(View v) {
                 if (!checkRecordPermission()) return;
-                if (lingoRecorder.isAvailable()) {
-                    if (lingoRecorder.isRecording()) {
-                        lingoRecorder.stop();
-                    } else {
-                        lingoRecorder.start();
-                        btn.setText(R.string.stop_record);
-                    }
+                if (lingoRecorder.isRecording()) {
+                    lingoRecorder.stop();
+                } else if (!lingoRecorder.isProcessing()){
+                    lingoRecorder.start();
+                    btn.setText(R.string.stop_record);
                 }
             }
         });
