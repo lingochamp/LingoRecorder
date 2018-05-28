@@ -6,7 +6,7 @@ group='com.github.lingochamp'
 ext {
     PUBLISH_GROUP_ID = 'com.liulishuo.engzo'
     PUBLISH_ARTIFACT_ID = 'lingo-recorder'
-    PUBLISH_VERSION = '1.2.4'
+    PUBLISH_VERSION = '1.2.5'
 }
 
 android {
