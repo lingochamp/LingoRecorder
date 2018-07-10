@@ -26,7 +26,7 @@ dependencies {
     })
 
     compile project(":lingo-recorder")
-//    compile 'com.liulishuo.engzo:lingo-recorder:1.0'
+//    compile 'com.liulishuo.engzo:lingo-recorder:1.2.5'
     compile 'com.android.support:appcompat-v7:25.3.0'
     compile 'com.android.support:recyclerview-v7:25.3.0'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'

@@ -2,6 +2,7 @@
 
 LingoRecord is a better recorder for Android, you can easily process pcm data from it.
 
+[ ![Download](https://api.bintray.com/packages/wangcongwu123/maven/LingoRecorder/images/download.svg) ](https://bintray.com/wangcongwu123/maven/LingoRecorder/_latestVersion)
 
 
 # Features
@@ -112,7 +113,7 @@ Demo 中提供了相关示例，效果图：
 Gradle:
 
 ```
-compile 'com.github.lingochamp:LingoRecorder:1.2.1-SNAPSHOT'
+compile 'com.liulishuo.engzo:lingo-recorder:1.2.5'
 
 ```
 
