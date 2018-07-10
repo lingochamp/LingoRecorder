@@ -23,7 +23,7 @@ task sourceJar(type: Jar) {
 
 publishing {
     publications {
-        okdownload(MavenPublication) {
+        lingoRecorder(MavenPublication) {
             groupId GROUP
             artifactId POM_ARTIFACT_ID
             version VERSION_NAME
