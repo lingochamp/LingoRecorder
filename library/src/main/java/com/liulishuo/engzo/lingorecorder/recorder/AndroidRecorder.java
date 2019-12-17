@@ -3,7 +3,8 @@ package com.liulishuo.engzo.lingorecorder.recorder;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
-import android.support.annotation.NonNull;
+
+import androidx.annotation.NonNull;
 
 import com.liulishuo.engzo.lingorecorder.recorder.exception.RecorderException;
 import com.liulishuo.engzo.lingorecorder.recorder.exception.RecorderGetBufferSizeException;

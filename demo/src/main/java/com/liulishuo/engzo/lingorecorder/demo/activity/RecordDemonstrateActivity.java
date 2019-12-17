@@ -3,12 +3,13 @@ package com.liulishuo.engzo.lingorecorder.demo.activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+
+import androidx.annotation.Nullable;
 
 import com.liulishuo.engzo.lingorecorder.LingoRecorder;
 import com.liulishuo.engzo.lingorecorder.demo.R;
