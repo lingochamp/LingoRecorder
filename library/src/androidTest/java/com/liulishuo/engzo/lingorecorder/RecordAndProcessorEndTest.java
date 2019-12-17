@@ -1,7 +1,7 @@
 package com.liulishuo.engzo.lingorecorder;
 
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.liulishuo.engzo.lingorecorder.processor.AudioProcessor;
 
@@ -97,7 +97,7 @@ public class RecordAndProcessorEndTest {
     private void sleep() {
         try {
             Thread.sleep(1000);
-        } catch (Exception e) {
+        } catch (Exception ignore) {
 
         }
     }

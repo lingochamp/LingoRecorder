@@ -1,14 +1,18 @@
 package com.liulishuo.engzo.lingorecorder;
 
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
+import android.Manifest;
 import android.util.Log;
+
+import androidx.test.filters.SmallTest;
+import androidx.test.rule.GrantPermissionRule;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.liulishuo.engzo.lingorecorder.processor.AudioProcessor;
 
 import junit.framework.Assert;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -22,6 +26,11 @@ import java.util.concurrent.CountDownLatch;
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class CancelRecordTest {
+
+    @Rule
+    public GrantPermissionRule pr = GrantPermissionRule.grant(
+            Manifest.permission.RECORD_AUDIO,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE);
 
     private LingoRecorder lingoRecorder;
 
@@ -66,12 +75,12 @@ public class CancelRecordTest {
 
         final CountDownLatch countDownLatch = new CountDownLatch(2);
 
-        final Throwable[] throwables = new Throwable[2];
+        final Throwable[] throwableArray = new Throwable[2];
 
         lingoRecorder.setOnProcessStopListener(new LingoRecorder.OnProcessStopListener() {
             @Override
             public void onProcessStop(Throwable throwable, Map<String, AudioProcessor> map) {
-                throwables[1] = throwable;
+                throwableArray[1] = throwable;
                 countDownLatch.countDown();
             }
         });
@@ -79,7 +88,7 @@ public class CancelRecordTest {
         lingoRecorder.setOnRecordStopListener(new LingoRecorder.OnRecordStopListener() {
             @Override
             public void onRecordStop(Throwable throwable, Result result) {
-                throwables[0] = throwable;
+                throwableArray[0] = throwable;
                 countDownLatch.countDown();
             }
         });
@@ -87,30 +96,26 @@ public class CancelRecordTest {
         lingoRecorder.start();
         try {
             Thread.sleep(5000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        } catch (InterruptedException ignore) {
         }
 
         lingoRecorder.cancel();
 
-        long startTime = System.currentTimeMillis();
+        long startCancelTime = System.currentTimeMillis();
 
         try {
             countDownLatch.await();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        } catch (InterruptedException ignore) {
         }
 
-        long cancelCostTime = System.currentTimeMillis() - startTime;
+        long cancelCostTime = System.currentTimeMillis() - startCancelTime;
 
         Assert.assertTrue(cancelCostTime < 1000);
 
-        Assert.assertNull(throwables[0]);
-        Assert.assertNotNull(throwables[1]);
-        Log.e(CancelRecordTest.class.getSimpleName(), Log.getStackTraceString(throwables[1]));
-        Assert.assertEquals(LingoRecorder.CancelProcessingException.class, throwables[1].getClass());
-
-
+        Assert.assertNull(throwableArray[0]);
+        Assert.assertNotNull(throwableArray[1]);
+        Log.e(CancelRecordTest.class.getSimpleName(), Log.getStackTraceString(throwableArray[1]));
+        Assert.assertEquals(LingoRecorder.CancelProcessingException.class, throwableArray[1].getClass());
     }
 
 }
