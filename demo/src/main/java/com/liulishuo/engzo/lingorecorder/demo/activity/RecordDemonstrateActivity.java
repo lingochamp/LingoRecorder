@@ -2,6 +2,7 @@ package com.liulishuo.engzo.lingorecorder.demo.activity;
 
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -10,13 +11,16 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
+import androidx.core.content.FileProvider;
 
 import com.liulishuo.engzo.lingorecorder.LingoRecorder;
+import com.liulishuo.engzo.lingorecorder.demo.BuildConfig;
 import com.liulishuo.engzo.lingorecorder.demo.R;
 import com.liulishuo.engzo.lingorecorder.demo.Utils;
 import com.liulishuo.engzo.lingorecorder.processor.AudioProcessor;
 import com.liulishuo.engzo.lingorecorder.volume.OnVolumeListener;
 
+import java.io.File;
 import java.util.Map;
 
 /**
@@ -62,7 +66,16 @@ public class RecordDemonstrateActivity extends RecordActivity {
             public void onClick(View v) {
                 Intent intent = new Intent();
                 intent.setAction(Intent.ACTION_VIEW);
-                intent.setDataAndType(Uri.parse("file://" + outputFile), "audio/*");
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    Uri contentUri = FileProvider.getUriForFile(
+                            getApplicationContext(),
+                            BuildConfig.APPLICATION_ID + ".fileProvider",
+                            new File(outputFile));
+                    intent.setDataAndType(contentUri, "audio/*");
+                } else {
+                    intent.setDataAndType(Uri.parse("file://" + outputFile), "audio/*");
+                }
                 startActivity(intent);
             }
         });
