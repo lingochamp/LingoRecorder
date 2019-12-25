@@ -4,10 +4,11 @@ import android.Manifest;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.os.Build;
-import android.support.v4.content.PermissionChecker;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.PermissionChecker;
 
 /**
  * Created by rantianhua on 17/8/29.
@@ -32,9 +33,9 @@ public class RecordPermissionHelper {
 
     public boolean checkRecordPermission() {
         if (PermissionChecker.checkSelfPermission(activity,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
+                Manifest.permission.WRITE_EXTERNAL_STORAGE) != PermissionChecker.PERMISSION_GRANTED
                 || PermissionChecker.checkSelfPermission(activity, Manifest.permission.RECORD_AUDIO)
-                != PackageManager.PERMISSION_GRANTED) {
+                != PermissionChecker.PERMISSION_GRANTED) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 if (activity.shouldShowRequestPermissionRationale(
                         Manifest.permission.WRITE_EXTERNAL_STORAGE) ||
@@ -69,7 +70,7 @@ public class RecordPermissionHelper {
     }
 
     public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            int[] grantResults) {
+                                           int[] grantResults) {
         if (requestCode == REQUEST_CODE_PERMISSION) {
             for (int grantResult : grantResults) {
                 if (grantResult != PackageManager.PERMISSION_GRANTED) {

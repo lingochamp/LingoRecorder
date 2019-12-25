@@ -1,11 +1,10 @@
 package com.liulishuo.engzo.lingorecorder;
 
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.liulishuo.engzo.lingorecorder.processor.AudioProcessor;
 import com.liulishuo.engzo.lingorecorder.processor.TimerProcessor;
-import com.liulishuo.engzo.lingorecorder.processor.WavProcessor;
 
 import junit.framework.Assert;
 

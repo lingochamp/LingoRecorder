@@ -3,7 +3,8 @@ package com.liulishuo.engzo.lingorecorder.demo;
 import android.media.MediaCodec;
 import android.media.MediaFormat;
 import android.os.Build;
-import android.support.annotation.RequiresApi;
+
+import androidx.annotation.RequiresApi;
 
 import com.liulishuo.engzo.lingorecorder.processor.AudioProcessor;
 import com.liulishuo.engzo.lingorecorder.utils.LOG;

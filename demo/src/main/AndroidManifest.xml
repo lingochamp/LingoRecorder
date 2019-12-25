@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.liulishuo.engzo.lingorecorder.demo">
-    
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
-    
+    package="com.liulishuo.engzo.lingorecorder.demo">
+
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -15,9 +15,10 @@
         android:theme="@style/AppTheme">
         <activity android:name=".activity.DemoListActivity">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-    
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity
@@ -29,17 +30,30 @@
         <activity
             android:name=".activity.FlacDemonstrateActivity"
             android:screenOrientation="portrait" />
-        
-        <service
-            android:name=".ScorerService"
-            android:process=":scorer"/>
 
         <activity
             android:name=".activity.AcrossProcessDemonstrateActivity"
             android:screenOrientation="portrait" />
+
         <activity
             android:name=".activity.VolumeDemonstrateActivity"
             android:screenOrientation="portrait" />
+
+        <service
+            android:name=".ScorerService"
+            android:process=":scorer" />
+
+        <provider
+            android:authorities="com.liulishuo.engzo.lingorecorder.demo.fileProvider"
+            android:name="androidx.core.content.FileProvider"
+            android:grantUriPermissions="true"
+            android:exported="false">
+
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+
+        </provider>
     </application>
 
 </manifest>

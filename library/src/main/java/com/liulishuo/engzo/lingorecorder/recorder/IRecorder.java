@@ -1,6 +1,7 @@
 package com.liulishuo.engzo.lingorecorder.recorder;
 
-import android.support.annotation.NonNull;
+
+import androidx.annotation.NonNull;
 
 import com.liulishuo.engzo.lingorecorder.utils.RecorderProperty;
 
