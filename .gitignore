@@ -6,3 +6,4 @@ local.properties
 .idea/libraries
 .idea/misc.xml
 *.iml
+.idea
