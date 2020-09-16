@@ -7,6 +7,7 @@ import android.os.Message;
 import android.support.annotation.NonNull;
 
 import com.liulishuo.engzo.lingorecorder.processor.AudioProcessor;
+import com.liulishuo.engzo.lingorecorder.processor.ProcessorProfilerWrapper;
 import com.liulishuo.engzo.lingorecorder.processor.WavProcessor;
 import com.liulishuo.engzo.lingorecorder.recorder.AndroidRecorder;
 import com.liulishuo.engzo.lingorecorder.recorder.IRecorder;
@@ -61,7 +62,6 @@ public class LingoRecorder {
     }
 
     /**
-     *
      * @deprecated use {@link #isProcessing()} instead
      */
     @Deprecated
@@ -149,7 +149,11 @@ public class LingoRecorder {
     }
 
     public void put(String processorId, AudioProcessor processor) {
-        audioProcessorMap.put(processorId, processor);
+        if (ProcessorProfilerWrapper.profiler != null) {
+            audioProcessorMap.put(processorId, new ProcessorProfilerWrapper(processorId, processor));
+        } else {
+            audioProcessorMap.put(processorId, processor);
+        }
     }
 
     public AudioProcessor remove(String processorId) {
